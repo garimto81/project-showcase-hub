@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useAuth } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
-import { Github } from 'lucide-react'
 
 function GoogleIcon({ className }: { className?: string }) {
   return (
@@ -30,43 +29,30 @@ function GoogleIcon({ className }: { className?: string }) {
 
 export function OAuthButtons() {
   const { signInWithOAuth } = useAuth()
-  const [isLoading, setIsLoading] = useState<'github' | 'google' | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleOAuth = async (provider: 'github' | 'google') => {
-    setIsLoading(provider)
+  const handleOAuth = async () => {
+    setIsLoading(true)
     try {
-      await signInWithOAuth(provider)
+      await signInWithOAuth('google')
     } finally {
-      setIsLoading(null)
+      setIsLoading(false)
     }
   }
 
   return (
-    <div className="grid grid-cols-2 gap-4">
-      <Button
-        variant="outline"
-        onClick={() => handleOAuth('github')}
-        disabled={isLoading !== null}
-      >
-        {isLoading === 'github' ? (
-          <span className="animate-spin mr-2">...</span>
-        ) : (
-          <Github className="mr-2 h-4 w-4" />
-        )}
-        GitHub
-      </Button>
-      <Button
-        variant="outline"
-        onClick={() => handleOAuth('google')}
-        disabled={isLoading !== null}
-      >
-        {isLoading === 'google' ? (
-          <span className="animate-spin mr-2">...</span>
-        ) : (
-          <GoogleIcon className="mr-2 h-4 w-4" />
-        )}
-        Google
-      </Button>
-    </div>
+    <Button
+      variant="outline"
+      onClick={handleOAuth}
+      disabled={isLoading}
+      className="w-full"
+    >
+      {isLoading ? (
+        <span className="animate-spin mr-2">...</span>
+      ) : (
+        <GoogleIcon className="mr-2 h-4 w-4" />
+      )}
+      Google로 계속하기
+    </Button>
   )
 }
