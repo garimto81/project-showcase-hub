@@ -44,7 +44,7 @@ export function ProjectActions({ projectId }: ProjectActionsProps) {
       }
 
       toast.success('프로젝트가 삭제되었습니다')
-      router.push('/dashboard')
+      router.push('/projects')
       router.refresh()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : '오류가 발생했습니다')

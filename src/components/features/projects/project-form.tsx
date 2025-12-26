@@ -39,7 +39,7 @@ export function ProjectForm({ mode, initialData, onSubmit }: ProjectFormProps) {
         thumbnail_url: thumbnailUrl.trim() || undefined,
       })
       toast.success(mode === 'create' ? '프로젝트가 생성되었습니다' : '프로젝트가 수정되었습니다')
-      router.push('/dashboard')
+      router.push('/projects')
     } catch (err) {
       toast.error(err instanceof Error ? err.message : '오류가 발생했습니다')
     } finally {

@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-const protectedRoutes = ['/dashboard', '/projects']
+const protectedRoutes = ['/projects']
 const authRoutes = ['/login', '/signup']
 
 export async function middleware(request: NextRequest) {
@@ -45,10 +45,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // 인증 라우트: 로그인 상태면 /dashboard로 리다이렉트
+  // 인증 라우트: 로그인 상태면 /projects로 리다이렉트
   if (authRoutes.some((route) => pathname.startsWith(route)) && user) {
     const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
+    url.pathname = '/projects'
     return NextResponse.redirect(url)
   }
 
@@ -56,5 +56,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/projects/:path*', '/login', '/signup'],
+  matcher: ['/projects/:path*', '/login', '/signup'],
 }

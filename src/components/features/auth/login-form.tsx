@@ -30,7 +30,7 @@ export function LoginForm() {
       if (error) {
         setError(error.message)
       } else {
-        const next = searchParams.get('next') || '/dashboard'
+        const next = searchParams.get('next') || '/projects'
         router.push(next)
         router.refresh()
       }
