@@ -12,73 +12,77 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 | 영역 | 기술 |
 |------|------|
-| Framework | Next.js 15 (App Router) |
-| Language | TypeScript |
+| Framework | Next.js 15 (App Router, RSC) |
+| Language | TypeScript (strict mode) |
 | Styling | Tailwind CSS v4 |
-| Components | shadcn/ui |
+| Components | shadcn/ui (new-york style) |
 | Database | Supabase (PostgreSQL) |
 | Auth | Supabase Auth + RBAC |
 | State | Zustand + TanStack Query |
 | Deploy | Vercel |
 
-## Project Structure
-
-```
-src/
-├── app/                    # Next.js App Router pages
-│   ├── (auth)/            # Auth routes (login, signup)
-│   ├── (dashboard)/       # Protected dashboard routes
-│   ├── api/               # API routes
-│   ├── layout.tsx
-│   └── page.tsx
-├── components/
-│   ├── ui/                # shadcn/ui components
-│   ├── features/          # Feature-specific components
-│   └── layout/            # Layout components
-├── lib/
-│   ├── supabase/          # Supabase client & utilities
-│   ├── utils.ts           # Utility functions
-│   └── validations/       # Zod schemas
-├── hooks/                 # Custom React hooks
-├── stores/                # Zustand stores
-└── types/                 # TypeScript type definitions
-```
-
 ## Development Commands
 
 ```bash
-# Development server
-npm run dev
-
-# Build for production
-npm run build
-
-# Start production server
-npm start
-
-# Linting
-npm run lint
-
-# Type checking
-npx tsc --noEmit
+npm run dev          # Development server (localhost:3000)
+npm run build        # Production build
+npm run lint         # ESLint
+npx tsc --noEmit     # Type check
 ```
 
-## Adding shadcn/ui Components
+### shadcn/ui Components
 
 ```bash
 npx shadcn@latest add [component-name]
 ```
 
-## Database Setup (Supabase)
+설정: `components.json` (new-york 스타일, lucide 아이콘)
 
-1. Create Supabase project at https://supabase.com
-2. Copy `.env.example` to `.env.local`
-3. Add Supabase credentials
-4. Run migrations (when available)
+## Architecture
+
+### App Router 구조 (계획)
+
+```
+src/app/
+├── (auth)/            # 인증 라우트 그룹 (login, signup)
+├── (dashboard)/       # 보호된 대시보드 라우트 그룹
+└── api/               # API Routes
+```
+
+### 계층형 데이터 모델
+
+```
+Organization → Workspace → Project → Sub-Project
+```
+
+각 계층은 역할 기반 접근 제어 (Admin, Manager, Member, Viewer) 적용
+
+### 주요 컴포넌트 위치
+
+| 디렉토리 | 용도 |
+|----------|------|
+| `components/ui/` | shadcn/ui 기본 컴포넌트 |
+| `components/features/` | 기능별 도메인 컴포넌트 |
+| `components/layout/` | 레이아웃 컴포넌트 |
+
+### State Management (계획)
+
+- **Server State**: TanStack Query (Supabase 데이터)
+- **Client State**: Zustand (UI 상태, 뷰 모드)
 
 ## Key Conventions
 
-- **한글 출력**: 커밋 메시지와 문서는 한글 사용
-- **절대 경로**: import는 `@/` alias 사용
-- **컴포넌트 파일명**: PascalCase (예: `ProjectCard.tsx`)
-- **유틸리티 파일명**: kebab-case (예: `format-date.ts`)
+- **언어**: 커밋 메시지와 문서는 한글 사용
+- **Import**: `@/` alias 사용 (예: `@/components/ui/button`)
+- **파일명**: 컴포넌트는 PascalCase, 유틸리티는 kebab-case
+- **CSS**: Tailwind CSS 변수 기반 테마 (`globals.css`)
+
+## Environment Setup
+
+```bash
+cp .env.example .env.local
+```
+
+필수 환경 변수:
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
