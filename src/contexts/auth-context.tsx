@@ -1,13 +1,18 @@
 "use client"
 
-import { createContext, useContext, useEffect, useState, useMemo } from 'react'
-import type { User, Session, SupabaseClient } from '@supabase/supabase-js'
+import { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react'
+import type { User, Session, SupabaseClient, AuthError } from '@supabase/supabase-js'
 import type { Database } from '@/types/database'
+
+type AuthResult = { error: AuthError | null }
 
 type AuthContextType = {
   user: User | null
   session: Session | null
   loading: boolean
+  signIn: (email: string, password: string) => Promise<AuthResult>
+  signUp: (email: string, password: string, displayName?: string) => Promise<AuthResult>
+  signInWithOAuth: (provider: 'github' | 'google') => Promise<void>
   signOut: () => Promise<void>
 }
 
@@ -59,15 +64,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe()
   }, [supabase])
 
-  const signOut = async () => {
+  const signIn = useCallback(async (email: string, password: string): Promise<AuthResult> => {
+    if (!supabase) {
+      return { error: { message: 'Supabase가 초기화되지 않았습니다', name: 'AuthError' } as AuthError }
+    }
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    return { error }
+  }, [supabase])
+
+  const signUp = useCallback(async (email: string, password: string, displayName?: string): Promise<AuthResult> => {
+    if (!supabase) {
+      return { error: { message: 'Supabase가 초기화되지 않았습니다', name: 'AuthError' } as AuthError }
+    }
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { display_name: displayName || email }
+      }
+    })
+    return { error }
+  }, [supabase])
+
+  const signInWithOAuth = useCallback(async (provider: 'github' | 'google'): Promise<void> => {
+    if (!supabase) return
+
+    const redirectTo = typeof window !== 'undefined'
+      ? `${window.location.origin}/auth/callback`
+      : undefined
+
+    await supabase.auth.signInWithOAuth({
+      provider,
+      options: { redirectTo }
+    })
+  }, [supabase])
+
+  const signOut = useCallback(async () => {
     if (supabase) {
       await supabase.auth.signOut()
     }
-  }
+  }, [supabase])
 
   const value = useMemo(
-    () => ({ user, session, loading, signOut }),
-    [user, session, loading]
+    () => ({ user, session, loading, signIn, signUp, signInWithOAuth, signOut }),
+    [user, session, loading, signIn, signUp, signInWithOAuth, signOut]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
