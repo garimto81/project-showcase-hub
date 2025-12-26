@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,6 +11,7 @@ import { OAuthButtons } from './oauth-buttons'
 
 export function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { signIn } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -29,7 +30,8 @@ export function LoginForm() {
       if (error) {
         setError(error.message)
       } else {
-        router.push('/dashboard')
+        const next = searchParams.get('next') || '/dashboard'
+        router.push(next)
         router.refresh()
       }
     } finally {

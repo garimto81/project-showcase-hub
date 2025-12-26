@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { useAuth } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
 
@@ -28,13 +29,15 @@ function GoogleIcon({ className }: { className?: string }) {
 }
 
 export function OAuthButtons() {
+  const searchParams = useSearchParams()
   const { signInWithOAuth } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
 
   const handleOAuth = async () => {
     setIsLoading(true)
     try {
-      await signInWithOAuth('google')
+      const next = searchParams.get('next') || undefined
+      await signInWithOAuth('google', next)
     } finally {
       setIsLoading(false)
     }

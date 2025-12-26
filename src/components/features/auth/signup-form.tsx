@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,6 +11,7 @@ import { OAuthButtons } from './oauth-buttons'
 
 export function SignupForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { signUp } = useAuth()
   const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
@@ -64,7 +65,10 @@ export function SignupForm() {
             <br />
             이메일의 링크를 클릭하여 계정을 활성화하세요.
           </p>
-          <Button variant="outline" onClick={() => router.push('/login')}>
+          <Button variant="outline" onClick={() => {
+            const next = searchParams.get('next')
+            router.push(next ? `/login?next=${encodeURIComponent(next)}` : '/login')
+          }}>
             로그인 페이지로 이동
           </Button>
         </CardContent>
