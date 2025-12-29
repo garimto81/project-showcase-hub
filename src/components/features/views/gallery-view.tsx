@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -40,11 +41,13 @@ export function GalleryView({ projects }: GalleryViewProps) {
           <Link key={project.id} href={`/projects/${project.id}`}>
             <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer overflow-hidden">
               {project.thumbnail_url ? (
-                <div className="aspect-video w-full overflow-hidden">
-                  <img
+                <div className="aspect-video w-full overflow-hidden relative">
+                  <Image
                     src={project.thumbnail_url}
                     alt={project.title}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    unoptimized
                   />
                 </div>
               ) : (

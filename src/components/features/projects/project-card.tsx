@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -31,11 +32,13 @@ export function ProjectCard({ project, averageRating }: ProjectCardProps) {
     <Link href={`/projects/${project.id}`}>
       <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
         {project.thumbnail_url && (
-          <div className="aspect-video w-full overflow-hidden rounded-t-lg">
-            <img
+          <div className="aspect-video w-full overflow-hidden rounded-t-lg relative">
+            <Image
               src={project.thumbnail_url}
               alt={project.title}
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
+              unoptimized
             />
           </div>
         )}

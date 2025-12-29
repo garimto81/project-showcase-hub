@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -61,11 +62,13 @@ export default async function ProjectPage({
       {/* 프로젝트 헤더 */}
       <Card>
         {project.thumbnail_url && (
-          <div className="aspect-video w-full overflow-hidden rounded-t-lg">
-            <img
+          <div className="aspect-video w-full overflow-hidden rounded-t-lg relative">
+            <Image
               src={project.thumbnail_url}
               alt={project.title}
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
+              unoptimized
             />
           </div>
         )}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -94,11 +95,13 @@ export function ProjectForm({ mode, initialData, onSubmit }: ProjectFormProps) {
               disabled={isSubmitting}
             />
             {thumbnailUrl && (
-              <div className="mt-2 aspect-video max-w-xs overflow-hidden rounded-lg border">
-                <img
+              <div className="mt-2 aspect-video max-w-xs overflow-hidden rounded-lg border relative">
+                <Image
                   src={thumbnailUrl}
                   alt="썸네일 미리보기"
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
+                  unoptimized
                   onError={(e) => {
                     e.currentTarget.style.display = 'none'
                   }}
