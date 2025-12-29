@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { LogOut, User } from 'lucide-react'
+import { Github, LogOut, User } from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -16,7 +16,7 @@ import {
 
 export function UserMenu() {
   const router = useRouter()
-  const { user, signOut, loading } = useAuth()
+  const { user, signOut, linkGitHubAccount, hasGitHubLinked, loading } = useAuth()
 
   const handleSignOut = async () => {
     await signOut()
@@ -66,6 +66,13 @@ export function UserMenu() {
         <DropdownMenuItem onClick={() => router.push('/profile')} disabled>
           <User className="mr-2 h-4 w-4" />
           <span>프로필</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => linkGitHubAccount()}
+          disabled={hasGitHubLinked}
+        >
+          <Github className="mr-2 h-4 w-4" />
+          <span>{hasGitHubLinked ? 'GitHub 연결됨' : 'GitHub 연결'}</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut} variant="destructive">
