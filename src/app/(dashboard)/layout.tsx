@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import { DashboardHeader } from '@/components/layout'
 
 export default function DashboardLayout({
   children,
@@ -7,15 +7,7 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 items-center">
-          <div className="mr-4 flex">
-            <Link href="/" className="mr-6 flex items-center space-x-2">
-              <span className="font-bold">Project Showcase Hub</span>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <DashboardHeader />
       <main className="container py-6">{children}</main>
     </div>
   )
