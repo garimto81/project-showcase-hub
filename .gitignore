@@ -40,3 +40,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# test screenshots
+test-*.png
+
+# Windows temp files
+nul
