@@ -14,6 +14,8 @@ type AuthContextType = {
   signUp: (email: string, password: string, displayName?: string) => Promise<AuthResult>
   signInWithOAuth: (provider: 'github' | 'google', next?: string) => Promise<void>
   signOut: () => Promise<void>
+  linkGitHubAccount: (next?: string) => Promise<void>
+  hasGitHubLinked: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -93,9 +95,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       ? `${window.location.origin}/auth/callback${next ? `?next=${encodeURIComponent(next)}` : ''}`
       : undefined
 
+    // GitHub 로그인 시 레포지토리 접근 권한 요청
+    const scopes = provider === 'github' ? 'read:user repo' : undefined
+
     await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: callbackUrl }
+      options: {
+        redirectTo: callbackUrl,
+        scopes,
+      }
     })
   }, [supabase])
 
@@ -105,9 +113,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [supabase])
 
+  const linkGitHubAccount = useCallback(async (next?: string): Promise<void> => {
+    if (!supabase) return
+
+    const callbackUrl = typeof window !== 'undefined'
+      ? `${window.location.origin}/auth/callback${next ? `?next=${encodeURIComponent(next)}` : ''}`
+      : undefined
+
+    await supabase.auth.linkIdentity({
+      provider: 'github',
+      options: {
+        redirectTo: callbackUrl,
+        scopes: 'read:user repo',
+      }
+    })
+  }, [supabase])
+
+  // GitHub 계정이 연동되어 있는지 확인
+  const hasGitHubLinked = useMemo(() => {
+    if (!user) return false
+    // provider가 github이거나, identities에 github가 포함되어 있으면 연동됨
+    if (user.app_metadata?.provider === 'github') return true
+    const identities = user.identities || []
+    return identities.some(identity => identity.provider === 'github')
+  }, [user])
+
   const value = useMemo(
-    () => ({ user, session, loading, signIn, signUp, signInWithOAuth, signOut }),
-    [user, session, loading, signIn, signUp, signInWithOAuth, signOut]
+    () => ({ user, session, loading, signIn, signUp, signInWithOAuth, signOut, linkGitHubAccount, hasGitHubLinked }),
+    [user, session, loading, signIn, signUp, signInWithOAuth, signOut, linkGitHubAccount, hasGitHubLinked]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
