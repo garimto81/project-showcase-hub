@@ -64,6 +64,27 @@ NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
 
+### OAuth 설정 (GitHub/Google 로그인)
+
+GitHub 또는 Google 로그인을 사용하려면 추가 설정이 필요합니다.
+
+#### GitHub OAuth
+
+1. [GitHub Developer Settings](https://github.com/settings/developers) → **OAuth Apps** → **New OAuth App**
+2. 설정:
+   - **Homepage URL**: `https://your-domain.vercel.app`
+   - **Authorization callback URL**: `https://your-project.supabase.co/auth/v1/callback`
+3. [Supabase Dashboard](https://supabase.com/dashboard) → **Authentication** → **Providers** → **GitHub** 활성화
+4. Client ID와 Client Secret 입력
+
+#### Google OAuth
+
+1. [Google Cloud Console](https://console.cloud.google.com/) → **APIs & Services** → **Credentials**
+2. **Create Credentials** → **OAuth client ID** → **Web application**
+3. Authorized redirect URIs에 추가: `https://your-project.supabase.co/auth/v1/callback`
+4. Supabase Dashboard → **Authentication** → **Providers** → **Google** 활성화
+5. Client ID와 Client Secret 입력
+
 ## Project Structure
 
 ```
