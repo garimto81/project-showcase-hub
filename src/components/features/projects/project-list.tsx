@@ -2,22 +2,10 @@
 
 import { ProjectCard } from './project-card'
 import { Skeleton } from '@/components/ui/skeleton'
-
-type Project = {
-  id: string
-  title: string
-  description: string | null
-  thumbnail_url: string | null
-  created_at: string
-  profiles: {
-    id: string
-    display_name: string | null
-    avatar_url: string | null
-  } | null
-}
+import type { ProjectWithProfile } from '@/types/database'
 
 type ProjectListProps = {
-  projects: Project[]
+  projects: ProjectWithProfile[]
   isLoading?: boolean
 }
 

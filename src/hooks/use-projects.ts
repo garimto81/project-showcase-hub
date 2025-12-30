@@ -1,23 +1,10 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-
-type Project = {
-  id: string
-  title: string
-  description: string | null
-  thumbnail_url: string | null
-  created_at: string
-  owner_id: string
-  profiles: {
-    id: string
-    display_name: string | null
-    avatar_url: string | null
-  } | null
-}
+import type { ProjectWithProfile } from '@/types/database'
 
 type ProjectsResponse = {
-  projects: Project[]
+  projects: ProjectWithProfile[]
   total: number
   limit: number
   offset: number
@@ -31,7 +18,7 @@ type UseProjectsOptions = {
 
 export function useProjects(options: UseProjectsOptions = {}) {
   const { userId, search, limit = 20 } = options
-  const [projects, setProjects] = useState<Project[]>([])
+  const [projects, setProjects] = useState<ProjectWithProfile[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -77,7 +64,7 @@ export function useProjects(options: UseProjectsOptions = {}) {
     }
 
     await fetchProjects()
-    return result as Project
+    return result as ProjectWithProfile
   }
 
   const updateProject = async (id: string, data: { title?: string; description?: string; thumbnail_url?: string }) => {
@@ -94,7 +81,7 @@ export function useProjects(options: UseProjectsOptions = {}) {
     }
 
     await fetchProjects()
-    return result as Project
+    return result as ProjectWithProfile
   }
 
   const deleteProject = async (id: string) => {

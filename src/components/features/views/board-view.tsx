@@ -3,27 +3,15 @@
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-
-type Project = {
-  id: string
-  title: string
-  description: string | null
-  thumbnail_url: string | null
-  created_at: string
-  profiles: {
-    id: string
-    display_name: string | null
-    avatar_url: string | null
-  } | null
-}
+import type { ProjectWithProfile } from '@/types/database'
 
 type BoardViewProps = {
-  projects: Project[]
+  projects: ProjectWithProfile[]
 }
 
 // 프로젝트를 월별로 그룹화
-function groupByMonth(projects: Project[]) {
-  const groups: Record<string, Project[]> = {}
+function groupByMonth(projects: ProjectWithProfile[]) {
+  const groups: Record<string, ProjectWithProfile[]> = {}
 
   projects.forEach((project) => {
     const date = new Date(project.created_at)

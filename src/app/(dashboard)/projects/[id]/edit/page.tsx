@@ -5,13 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { useProjects } from '@/hooks/use-projects'
 import { ProjectForm } from '@/components/features/projects'
 import { Skeleton } from '@/components/ui/skeleton'
-
-type Project = {
-  id: string
-  title: string
-  description: string | null
-  thumbnail_url: string | null
-}
+import type { Project } from '@/types/database'
 
 export default function EditProjectPage() {
   const params = useParams()
