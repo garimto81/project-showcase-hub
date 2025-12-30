@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 import { ProjectCard } from './project-card'
+import type { ProjectWithProfile } from '@/types/database'
 
 // Next.js Link mock
 vi.mock('next/link', () => ({
@@ -9,12 +10,14 @@ vi.mock('next/link', () => ({
   ),
 }))
 
-const mockProject = {
+const mockProject: ProjectWithProfile = {
   id: 'project-1',
   title: '테스트 프로젝트',
   description: '프로젝트 설명입니다',
   thumbnail_url: 'https://example.com/image.jpg',
+  owner_id: 'user-1',
   created_at: '2024-01-01T00:00:00Z',
+  updated_at: '2024-01-01T00:00:00Z',
   profiles: {
     id: 'user-1',
     display_name: '홍길동',
@@ -87,11 +90,12 @@ describe('ProjectCard', () => {
   })
 
   it('renders "익명" when display_name is null', () => {
-    const projectWithNullName = {
+    const projectWithNullName: ProjectWithProfile = {
       ...mockProject,
       profiles: {
-        ...mockProject.profiles,
+        id: 'user-1',
         display_name: null,
+        avatar_url: null,
       },
     }
 

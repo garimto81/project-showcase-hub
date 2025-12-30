@@ -4,22 +4,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ChevronRight } from 'lucide-react'
-
-type Project = {
-  id: string
-  title: string
-  description: string | null
-  thumbnail_url: string | null
-  created_at: string
-  profiles: {
-    id: string
-    display_name: string | null
-    avatar_url: string | null
-  } | null
-}
+import type { ProjectWithProfile } from '@/types/database'
 
 type ListViewProps = {
-  projects: Project[]
+  projects: ProjectWithProfile[]
 }
 
 export function ListView({ projects }: ListViewProps) {

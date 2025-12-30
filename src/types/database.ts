@@ -150,6 +150,10 @@ export type Rating = Database['public']['Tables']['ratings']['Row']
 export type Comment = Database['public']['Tables']['comments']['Row']
 
 // 프로필 정보가 포함된 타입
+export type ProjectWithProfile = Project & {
+  profiles: Pick<Profile, 'id' | 'display_name' | 'avatar_url'> | null
+}
+
 export type RatingWithProfile = Rating & {
   profiles: Pick<Profile, 'display_name' | 'avatar_url'>
 }
