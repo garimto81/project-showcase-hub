@@ -2,17 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/hooks/use-auth'
+import type { RatingWithProfile } from '@/types/database'
 
 interface RatingData {
-  ratings: Array<{
-    id: string
-    score: number
-    user_id: string
-    profiles: {
-      display_name: string | null
-      avatar_url: string | null
-    }
-  }>
+  ratings: RatingWithProfile[]
   average: number
   total: number
   distribution: Record<number, number>
@@ -30,6 +23,8 @@ export function useRating(projectId: string) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  const userId = user?.id
+
   const fetchRatings = useCallback(async () => {
     try {
       setLoading(true)
@@ -43,18 +38,20 @@ export function useRating(projectId: string) {
       setData(result)
 
       // 현재 사용자의 별점 찾기
-      if (user) {
+      if (userId) {
         const myRating = result.ratings.find(
-          (r: { user_id: string }) => r.user_id === user.id
+          (r: RatingWithProfile) => r.user_id === userId
         )
         setUserRating(myRating?.score ?? null)
+      } else {
+        setUserRating(null)
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : '오류가 발생했습니다')
     } finally {
       setLoading(false)
     }
-  }, [projectId, user])
+  }, [projectId, userId])
 
   useEffect(() => {
     fetchRatings()
