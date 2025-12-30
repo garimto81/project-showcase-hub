@@ -33,7 +33,7 @@ test.describe('GitHub 레포지토리 (인증됨)', () => {
     expect(hasGitHubContent || hasRepoCards || hasLinkButton).toBeTruthy()
   })
 
-  test('GitHub API가 정상 응답한다', async ({ page, request }) => {
+  test('GitHub API가 정상 응답한다', async ({ page }) => {
     // 먼저 페이지 방문하여 쿠키 설정
     await page.goto('/projects')
     await page.waitForLoadState('networkidle')
