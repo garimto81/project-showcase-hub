@@ -1,5 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import {
+  requireAuth,
+  parseJsonBody,
+  apiError,
+  apiSuccess,
+} from '@/lib/api/utils'
 
 // GET: 프로젝트 별점 목록 및 통계
 export async function GET(
@@ -15,7 +21,7 @@ export async function GET(
     .eq('project_id', projectId)
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return apiError.serverError(error.message)
   }
 
   // 평균 및 분포 계산
@@ -30,7 +36,7 @@ export async function GET(
     return acc
   }, {} as Record<number, number>)
 
-  return NextResponse.json({
+  return apiSuccess.ok({
     ratings,
     average,
     total,
@@ -46,16 +52,17 @@ export async function POST(
   const { projectId } = await params
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return NextResponse.json({ error: '로그인이 필요합니다' }, { status: 401 })
-  }
+  // 인증 확인
+  const authResult = await requireAuth(supabase)
+  if (authResult.error) return authResult.error
 
-  const body = await request.json()
-  const { score } = body
+  // JSON 파싱
+  const bodyResult = await parseJsonBody<{ score?: number }>(request)
+  if (bodyResult.error) return bodyResult.error
 
+  const { score } = bodyResult.data
   if (!score || score < 1 || score > 5) {
-    return NextResponse.json({ error: '1-5 사이의 점수를 입력해주세요' }, { status: 400 })
+    return apiError.badRequest('1-5 사이의 점수를 입력해주세요')
   }
 
   const { data, error } = await supabase
@@ -63,7 +70,7 @@ export async function POST(
     .upsert(
       {
         project_id: projectId,
-        user_id: user.id,
+        user_id: authResult.user.id,
         score,
         updated_at: new Date().toISOString(),
       },
@@ -73,10 +80,10 @@ export async function POST(
     .single()
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return apiError.serverError(error.message)
   }
 
-  return NextResponse.json(data)
+  return apiSuccess.ok(data)
 }
 
 // DELETE: 별점 삭제
@@ -87,20 +94,19 @@ export async function DELETE(
   const { projectId } = await params
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return NextResponse.json({ error: '로그인이 필요합니다' }, { status: 401 })
-  }
+  // 인증 확인
+  const authResult = await requireAuth(supabase)
+  if (authResult.error) return authResult.error
 
   const { error } = await supabase
     .from('ratings')
     .delete()
     .eq('project_id', projectId)
-    .eq('user_id', user.id)
+    .eq('user_id', authResult.user.id)
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return apiError.serverError(error.message)
   }
 
-  return NextResponse.json({ success: true })
+  return apiSuccess.deleted()
 }

@@ -1,5 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import {
+  requireAuth,
+  parseJsonBody,
+  apiError,
+  apiSuccess,
+} from '@/lib/api/utils'
 
 // GET: 프로젝트 댓글 목록
 export async function GET(
@@ -16,10 +22,10 @@ export async function GET(
     .order('created_at', { ascending: false })
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return apiError.serverError(error.message)
   }
 
-  return NextResponse.json(data || [])
+  return apiSuccess.ok(data || [])
 }
 
 // POST: 댓글 생성
@@ -30,31 +36,32 @@ export async function POST(
   const { projectId } = await params
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return NextResponse.json({ error: '로그인이 필요합니다' }, { status: 401 })
-  }
+  // 인증 확인
+  const authResult = await requireAuth(supabase)
+  if (authResult.error) return authResult.error
 
-  const body = await request.json()
-  const { content } = body
+  // JSON 파싱
+  const bodyResult = await parseJsonBody<{ content?: string }>(request)
+  if (bodyResult.error) return bodyResult.error
 
+  const { content } = bodyResult.data
   if (!content?.trim()) {
-    return NextResponse.json({ error: '댓글 내용을 입력해주세요' }, { status: 400 })
+    return apiError.badRequest('댓글 내용을 입력해주세요')
   }
 
   const { data, error } = await supabase
     .from('comments')
     .insert({
       project_id: projectId,
-      user_id: user.id,
+      user_id: authResult.user.id,
       content: content.trim(),
     })
     .select('*, profiles(display_name, avatar_url)')
     .single()
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return apiError.serverError(error.message)
   }
 
-  return NextResponse.json(data, { status: 201 })
+  return apiSuccess.created(data)
 }
