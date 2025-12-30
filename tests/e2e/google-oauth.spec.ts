@@ -11,12 +11,17 @@ test.describe('Google OAuth 로그인', () => {
     })
 
     test('Google 버튼 클릭 시 OAuth 페이지로 리다이렉트된다', async ({ page }) => {
-      await page.goto('/login')
+      // networkidle로 Supabase 클라이언트 초기화 대기
+      await page.goto('/login', { waitUntil: 'networkidle' })
 
       const googleButton = page.getByRole('button', { name: /google/i })
+      await expect(googleButton).toBeEnabled()
+
+      // Supabase 클라이언트 초기화 완료 대기 (동적 import)
+      await page.waitForTimeout(1000)
 
       // 네비게이션 대기 설정
-      const navigationPromise = page.waitForURL(/accounts\.google\.com|supabase/, { timeout: 10000 })
+      const navigationPromise = page.waitForURL(/accounts\.google\.com|supabase/, { timeout: 15000 })
 
       await googleButton.click()
 
@@ -37,12 +42,17 @@ test.describe('Google OAuth 로그인', () => {
     })
 
     test('Google 버튼 클릭 시 OAuth 페이지로 리다이렉트된다', async ({ page }) => {
-      await page.goto('/signup')
+      // networkidle로 Supabase 클라이언트 초기화 대기
+      await page.goto('/signup', { waitUntil: 'networkidle' })
 
       const googleButton = page.getByRole('button', { name: /google/i })
+      await expect(googleButton).toBeEnabled()
+
+      // Supabase 클라이언트 초기화 완료 대기 (동적 import)
+      await page.waitForTimeout(1000)
 
       // 네비게이션 대기 설정
-      const navigationPromise = page.waitForURL(/accounts\.google\.com|supabase/, { timeout: 10000 })
+      const navigationPromise = page.waitForURL(/accounts\.google\.com|supabase/, { timeout: 15000 })
 
       await googleButton.click()
 

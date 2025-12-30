@@ -11,12 +11,17 @@ test.describe('GitHub OAuth 로그인', () => {
     })
 
     test('GitHub 버튼 클릭 시 OAuth 페이지로 리다이렉트된다', async ({ page }) => {
-      await page.goto('/login')
+      // networkidle로 Supabase 클라이언트 초기화 대기
+      await page.goto('/login', { waitUntil: 'networkidle' })
 
       const githubButton = page.getByRole('button', { name: /github/i })
+      await expect(githubButton).toBeEnabled()
+
+      // Supabase 클라이언트 초기화 완료 대기 (동적 import)
+      await page.waitForTimeout(1000)
 
       // 네비게이션 대기 설정
-      const navigationPromise = page.waitForURL(/github\.com|supabase/, { timeout: 10000 })
+      const navigationPromise = page.waitForURL(/github\.com|supabase/, { timeout: 15000 })
 
       await githubButton.click()
 
