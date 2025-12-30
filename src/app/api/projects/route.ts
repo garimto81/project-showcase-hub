@@ -1,5 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
-import { NextResponse } from 'next/server'
+import {
+  requireAuth,
+  parseJsonBody,
+  apiError,
+  apiSuccess,
+} from '@/lib/api/utils'
 
 // GET: 프로젝트 목록 조회
 export async function GET(request: Request) {
@@ -37,10 +42,10 @@ export async function GET(request: Request) {
   const { data, error, count } = await query
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return apiError.serverError(error.message)
   }
 
-  return NextResponse.json({
+  return apiSuccess.ok({
     projects: data,
     total: count,
     limit,
@@ -52,39 +57,34 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const supabase = await createClient()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // 인증 확인
+  const authResult = await requireAuth(supabase)
+  if (authResult.error) return authResult.error
 
-  if (!user) {
-    return NextResponse.json({ error: '로그인이 필요합니다' }, { status: 401 })
+  // JSON 파싱
+  const bodyResult = await parseJsonBody<{ title?: string; description?: string; thumbnail_url?: string }>(request)
+  if (bodyResult.error) return bodyResult.error
+
+  const { title, description, thumbnail_url } = bodyResult.data
+
+  if (!title?.trim()) {
+    return apiError.badRequest('프로젝트 제목은 필수입니다')
   }
 
-  try {
-    const body = await request.json()
-    const { title, description, thumbnail_url } = body
+  const { data, error } = await supabase
+    .from('projects')
+    .insert({
+      title: title.trim(),
+      description: description?.trim() || null,
+      thumbnail_url: thumbnail_url || null,
+      owner_id: authResult.user.id,
+    })
+    .select()
+    .single()
 
-    if (!title?.trim()) {
-      return NextResponse.json({ error: '프로젝트 제목은 필수입니다' }, { status: 400 })
-    }
-
-    const { data, error } = await supabase
-      .from('projects')
-      .insert({
-        title: title.trim(),
-        description: description?.trim() || null,
-        thumbnail_url: thumbnail_url || null,
-        owner_id: user.id,
-      })
-      .select()
-      .single()
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
-
-    return NextResponse.json(data, { status: 201 })
-  } catch {
-    return NextResponse.json({ error: '잘못된 요청입니다' }, { status: 400 })
+  if (error) {
+    return apiError.serverError(error.message)
   }
+
+  return apiSuccess.created(data)
 }
