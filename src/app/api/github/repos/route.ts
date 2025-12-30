@@ -24,17 +24,23 @@ export interface GitHubRepo {
 }
 
 export async function GET() {
-  // 인증 확인
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
 
+  // 인증 확인
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
     return NextResponse.json({ error: '로그인이 필요합니다' }, { status: 401 })
   }
 
-  // GitHub 토큰 가져오기
+  // GitHub 토큰 가져오기 (쿠키 → 세션 순서로 확인)
   const cookieStore = await cookies()
-  const githubToken = cookieStore.get('github_token')?.value
+  let githubToken = cookieStore.get('github_token')?.value
+
+  // 쿠키에 없으면 세션에서 provider_token 확인
+  if (!githubToken) {
+    const { data: { session } } = await supabase.auth.getSession()
+    githubToken = session?.provider_token ?? undefined
+  }
 
   if (!githubToken) {
     return NextResponse.json(
@@ -44,7 +50,6 @@ export async function GET() {
   }
 
   try {
-    // GitHub API로 레포지토리 가져오기
     const response = await fetch(
       'https://api.github.com/user/repos?sort=updated&per_page=100',
       {
