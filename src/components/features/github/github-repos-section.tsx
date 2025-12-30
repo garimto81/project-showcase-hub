@@ -1,12 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { Github, RefreshCw, Link2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Github, RefreshCw, Link2, Plus, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useGitHubRepos } from '@/hooks/use-github-repos'
+import { useProjects } from '@/hooks/use-projects'
 import { useAuth } from '@/hooks/use-auth'
-import { RepoCard } from './repo-card'
+import { SelectableRepoCard } from './selectable-repo-card'
+import { toast } from 'sonner'
 
 function ReposSkeleton() {
   return (
@@ -27,17 +30,65 @@ function ReposSkeleton() {
 }
 
 export function GitHubReposSection() {
+  const router = useRouter()
   const { user, hasGitHubLinked, linkGitHubAccount } = useAuth()
   const { repos, loading, error, refetch } = useGitHubRepos()
+  const { createProject } = useProjects()
   const [isLinking, setIsLinking] = useState(false)
+  const [selectedRepos, setSelectedRepos] = useState<Set<number>>(new Set())
+  const [isCreating, setIsCreating] = useState(false)
 
   const handleLinkGitHub = async () => {
     setIsLinking(true)
     try {
-      // 현재 페이지로 돌아오도록 설정
-      await linkGitHubAccount('/')
+      await linkGitHubAccount('/projects/new')
     } finally {
       setIsLinking(false)
+    }
+  }
+
+  const handleToggleRepo = (repoId: number) => {
+    setSelectedRepos(prev => {
+      const next = new Set(prev)
+      if (next.has(repoId)) {
+        next.delete(repoId)
+      } else {
+        next.add(repoId)
+      }
+      return next
+    })
+  }
+
+  const handleCreateProjects = async () => {
+    if (selectedRepos.size === 0) return
+
+    setIsCreating(true)
+    try {
+      const selectedRepoList = repos.filter(r => selectedRepos.has(r.id))
+      let successCount = 0
+
+      for (const repo of selectedRepoList) {
+        try {
+          await createProject({
+            title: repo.name,
+            description: repo.description || `GitHub: ${repo.html_url}`,
+            thumbnail_url: `https://opengraph.githubassets.com/1/${repo.full_name}`,
+          })
+          successCount++
+        } catch (err) {
+          console.error(`Failed to create project for ${repo.name}:`, err)
+        }
+      }
+
+      if (successCount > 0) {
+        toast.success(`${successCount}개 프로젝트가 생성되었습니다`)
+        router.push('/projects')
+      } else {
+        toast.error('프로젝트 생성에 실패했습니다')
+      }
+    } finally {
+      setIsCreating(false)
+      setSelectedRepos(new Set())
     }
   }
 
@@ -87,17 +138,42 @@ export function GitHubReposSection() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          총 {repos.length}개의 레포지토리
-        </p>
-        <Button onClick={refetch} variant="ghost" size="sm">
-          <RefreshCw className="h-4 w-4 mr-2" />
-          새로고침
-        </Button>
+        <div>
+          <p className="text-sm text-muted-foreground">
+            총 {repos.length}개의 레포지토리
+          </p>
+          {selectedRepos.size > 0 && (
+            <p className="text-sm font-medium text-primary">
+              {selectedRepos.size}개 선택됨
+            </p>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <Button onClick={refetch} variant="ghost" size="sm" disabled={isCreating}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            새로고침
+          </Button>
+          {selectedRepos.size > 0 && (
+            <Button onClick={handleCreateProjects} disabled={isCreating}>
+              {isCreating ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Plus className="h-4 w-4 mr-2" />
+              )}
+              {isCreating ? '생성 중...' : `${selectedRepos.size}개 프로젝트 생성`}
+            </Button>
+          )}
+        </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {repos.map((repo) => (
-          <RepoCard key={repo.id} repo={repo} />
+          <SelectableRepoCard
+            key={repo.id}
+            repo={repo}
+            selected={selectedRepos.has(repo.id)}
+            onToggle={() => handleToggleRepo(repo.id)}
+            disabled={isCreating}
+          />
         ))}
       </div>
     </div>
