@@ -16,18 +16,18 @@ export default defineConfig({
     screenshot: 'only-on-failure',
   },
   projects: [
-    // 인증 설정 프로젝트 (수동 실행)
+    // 공개 페이지 테스트 (기본 실행)
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+      testIgnore: [/authenticated\//, /auth\.setup\.ts/],
+    },
+    // 인증 설정 프로젝트 (수동 실행: npx playwright test --project=setup)
     {
       name: 'setup',
       testMatch: /auth\.setup\.ts/,
     },
-    // 공개 페이지 테스트 (인증 불필요)
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-      testIgnore: /authenticated\//,
-    },
-    // 인증된 사용자 테스트
+    // 인증된 사용자 테스트 (수동 실행: npx playwright test --project=authenticated)
     {
       name: 'authenticated',
       use: {
