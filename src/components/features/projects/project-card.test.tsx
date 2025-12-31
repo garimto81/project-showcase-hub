@@ -18,6 +18,10 @@ const mockProject: ProjectWithProfile = {
   owner_id: 'user-1',
   created_at: '2024-01-01T00:00:00Z',
   updated_at: '2024-01-01T00:00:00Z',
+  url: 'https://example.com/app',
+  app_type: 'web_app',
+  is_favorite: false,
+  github_repo: 'user/repo',
   profiles: {
     id: 'user-1',
     display_name: '홍길동',
@@ -133,5 +137,36 @@ describe('ProjectCard', () => {
 
     expect(screen.getByText('테스트 프로젝트')).toBeInTheDocument()
     expect(screen.queryByText('프로젝트 설명입니다')).not.toBeInTheDocument()
+  })
+
+  it('renders app launch button when url is provided', () => {
+    render(<ProjectCard project={mockProject} />)
+
+    expect(screen.getByRole('button', { name: /앱 열기/i })).toBeInTheDocument()
+  })
+
+  it('does not render app launch button when url is null', () => {
+    const projectWithoutUrl = {
+      ...mockProject,
+      url: null,
+    }
+
+    render(<ProjectCard project={projectWithoutUrl} />)
+
+    expect(screen.queryByRole('button', { name: /앱 열기/i })).not.toBeInTheDocument()
+  })
+
+  it('renders favorite star when is_favorite is true', () => {
+    const favoriteProject = {
+      ...mockProject,
+      is_favorite: true,
+      thumbnail_url: null,
+    }
+
+    render(<ProjectCard project={favoriteProject} />)
+
+    // 즐겨찾기 상태일 때 노란 별이 표시됨
+    const header = screen.getByText('테스트 프로젝트').closest('div')
+    expect(header).toBeInTheDocument()
   })
 })

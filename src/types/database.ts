@@ -1,3 +1,46 @@
+// MVP 추가 타입
+export type AppType = 'web_app' | 'pwa' | 'api' | 'docker'
+export type ScanStatus = 'idle' | 'scanning' | 'completed' | 'error'
+
+export interface ScanResult {
+  totalRepos: number
+  scannedRepos: number
+  detectedApps: DetectedApp[]
+  skippedRepos: string[]
+  errors: ScanError[]
+}
+
+export interface DetectedApp {
+  repoFullName: string
+  repoName: string
+  description: string | null
+  url: string
+  source: DeploymentSource
+  confidence: 'high' | 'medium' | 'low'
+  thumbnailUrl: string | null
+}
+
+export type DeploymentSource =
+  | 'github_homepage'
+  | 'github_pages'
+  | 'github_environments'
+  | 'readme_link'
+  | 'readme_badge'
+  | 'url_inference'
+
+export interface ScanError {
+  repo: string
+  error: string
+}
+
+export interface ScanProgress {
+  status: ScanStatus
+  currentRepo: string | null
+  scannedCount: number
+  totalCount: number
+  detectedApps: DetectedApp[]
+}
+
 export type Database = {
   public: {
     Tables: {
@@ -36,6 +79,11 @@ export type Database = {
           thumbnail_url: string | null
           created_at: string
           updated_at: string
+          // MVP 추가 필드
+          url: string | null
+          app_type: AppType
+          is_favorite: boolean
+          github_repo: string | null
         }
         Insert: {
           id?: string
@@ -45,12 +93,22 @@ export type Database = {
           thumbnail_url?: string | null
           created_at?: string
           updated_at?: string
+          // MVP 추가 필드
+          url?: string | null
+          app_type?: AppType
+          is_favorite?: boolean
+          github_repo?: string | null
         }
         Update: {
           title?: string
           description?: string | null
           thumbnail_url?: string | null
           updated_at?: string
+          // MVP 추가 필드
+          url?: string | null
+          app_type?: AppType
+          is_favorite?: boolean
+          github_repo?: string | null
         }
         Relationships: [
           {
