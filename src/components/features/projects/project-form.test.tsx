@@ -156,7 +156,7 @@ describe('ProjectForm', () => {
 
   describe('제출 상태', () => {
     it('제출 중 폼이 비활성화된다', async () => {
-      let resolveSubmit: () => void
+      let resolveSubmit: (value?: unknown) => void
       mockOnSubmit.mockImplementationOnce(
         () => new Promise((resolve) => { resolveSubmit = resolve })
       )
@@ -213,7 +213,7 @@ describe('ProjectForm', () => {
     })
 
     it('제출 중에는 취소 버튼이 비활성화된다', async () => {
-      let resolveSubmit: () => void
+      let resolveSubmit: (value?: unknown) => void
       mockOnSubmit.mockImplementationOnce(
         () => new Promise((resolve) => { resolveSubmit = resolve })
       )

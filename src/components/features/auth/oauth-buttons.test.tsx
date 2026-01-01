@@ -51,7 +51,7 @@ describe('OAuthButtons', () => {
   })
 
   it('로딩 중 모든 버튼이 비활성화된다', async () => {
-    let resolveOAuth: () => void
+    let resolveOAuth: (value?: unknown) => void
     mockSignInWithOAuth.mockImplementationOnce(
       () => new Promise((resolve) => { resolveOAuth = resolve })
     )
@@ -73,7 +73,7 @@ describe('OAuthButtons', () => {
   })
 
   it('로딩 중 로딩 인디케이터를 표시한다', async () => {
-    let resolveOAuth: () => void
+    let resolveOAuth: (value?: unknown) => void
     mockSignInWithOAuth.mockImplementationOnce(
       () => new Promise((resolve) => { resolveOAuth = resolve })
     )

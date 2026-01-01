@@ -42,7 +42,7 @@ describe('CommentsSection', () => {
       content: '첫 번째 댓글입니다',
       created_at: '2025-01-01T00:00:00Z',
       updated_at: '2025-01-01T00:00:00Z',
-      profile: { display_name: 'User 1', avatar_url: null },
+      profiles: { display_name: 'User 1', avatar_url: null },
     },
     {
       id: 'comment-2',
@@ -51,7 +51,7 @@ describe('CommentsSection', () => {
       content: '두 번째 댓글입니다',
       created_at: '2025-01-01T01:00:00Z',
       updated_at: '2025-01-01T01:00:00Z',
-      profile: { display_name: 'User 2', avatar_url: 'https://example.com/avatar.jpg' },
+      profiles: { display_name: 'User 2', avatar_url: 'https://example.com/avatar.jpg' },
     },
   ]
 

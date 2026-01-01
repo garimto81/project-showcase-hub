@@ -26,7 +26,7 @@ describe('ProjectList', () => {
       github_repo: null,
       created_at: '2025-01-01T00:00:00Z',
       updated_at: '2025-01-01T00:00:00Z',
-      profile: { display_name: 'User 1', avatar_url: null },
+      profiles: { id: 'user-1', display_name: 'User 1', avatar_url: null },
     },
     {
       id: 'project-2',
@@ -40,7 +40,7 @@ describe('ProjectList', () => {
       github_repo: 'user/project-2',
       created_at: '2025-01-02T00:00:00Z',
       updated_at: '2025-01-02T00:00:00Z',
-      profile: { display_name: 'User 2', avatar_url: 'https://example.com/avatar.jpg' },
+      profiles: { id: 'user-2', display_name: 'User 2', avatar_url: 'https://example.com/avatar.jpg' },
     },
     {
       id: 'project-3',
@@ -54,7 +54,7 @@ describe('ProjectList', () => {
       github_repo: null,
       created_at: '2025-01-03T00:00:00Z',
       updated_at: '2025-01-03T00:00:00Z',
-      profile: { display_name: 'User 1', avatar_url: null },
+      profiles: { id: 'user-1', display_name: 'User 1', avatar_url: null },
     },
   ]
 

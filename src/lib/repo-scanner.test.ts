@@ -292,10 +292,8 @@ describe('RepoScanner', () => {
         json: () => Promise.resolve(tenRepos),
       })
 
-      // 각 레포에 대해 지연된 응답
-      let callCount = 0
+      // 각 레포에 대해 응답
       mockDetectDeploymentUrl.mockImplementation(() => {
-        callCount++
         return Promise.resolve({
           url: null,
           source: null,
