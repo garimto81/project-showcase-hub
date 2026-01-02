@@ -74,28 +74,31 @@ test.describe('GitHub OAuth 로그인', () => {
     })
   })
 
-  test.describe('보호된 라우트 리다이렉트', () => {
-    test('비인증 상태로 /projects 접근 시 로그인 페이지로 리다이렉트된다', async ({ page }) => {
+  test.describe('라우트 접근 권한', () => {
+    test('비인증 상태로 /projects 접근 시 프로젝트 목록이 표시된다', async ({ page }) => {
       await page.goto('/projects')
 
-      await page.waitForURL(/\/login/)
-      expect(page.url()).toContain('/login')
+      // /projects는 공개 라우트이므로 접근 가능
+      await page.waitForURL(/\/projects/)
+      expect(page.url()).toContain('/projects')
     })
 
     test('비인증 상태로 /projects/new 접근 시 로그인 페이지로 리다이렉트된다', async ({ page }) => {
       await page.goto('/projects/new')
 
+      // Admin 전용 라우트이므로 로그인으로 리다이렉트
       await page.waitForURL(/\/login/)
       expect(page.url()).toContain('/login')
     })
 
-    test('로그인 페이지에 next 파라미터가 전달된다', async ({ page }) => {
+    test('Admin 라우트 접근 시 next 파라미터가 전달된다', async ({ page }) => {
       await page.goto('/projects/new')
 
       await page.waitForURL(/\/login/)
-      // next 파라미터가 URL에 포함될 수 있음 (미들웨어 구현에 따라)
+      // next 파라미터가 URL에 포함됨
       const url = page.url()
       expect(url).toContain('/login')
+      expect(url).toContain('next')
     })
   })
 })

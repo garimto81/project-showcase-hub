@@ -54,7 +54,9 @@ export default async function ProjectPage({
 
   const ownerName = project.profiles?.display_name || '익명'
   const ownerInitial = ownerName.charAt(0).toUpperCase()
-  const isOwner = currentUser?.id === project.owner_id
+  // Admin 권한 체크: 환경변수 미설정 시 모든 로그인 사용자가 Admin
+  const adminUserId = process.env.NEXT_PUBLIC_ADMIN_USER_ID
+  const isAdmin = currentUser ? (!adminUserId || currentUser.id === adminUserId) : false
   const createdAt = new Date(project.created_at).toLocaleDateString('ko-KR')
 
   return (
@@ -80,7 +82,7 @@ export default async function ProjectPage({
                 {createdAt}에 생성됨
               </CardDescription>
             </div>
-            {isOwner && <ProjectActions projectId={id} />}
+            {isAdmin && <ProjectActions projectId={id} />}
           </div>
         </CardHeader>
         <CardContent className="space-y-4">

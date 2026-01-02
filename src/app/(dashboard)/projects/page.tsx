@@ -36,7 +36,7 @@ function ProjectsSkeleton() {
 }
 
 export default function ProjectsPage() {
-  const { user } = useAuth()
+  const { user, isAdmin } = useAuth()
   const [search, setSearch] = useState('')
   const [showMyProjects, setShowMyProjects] = useState(false)
   const [viewMode, setViewMode] = useState<ViewMode>('gallery')
@@ -76,7 +76,7 @@ export default function ProjectsPage() {
               {showMyProjects ? '내 프로젝트' : '모든 프로젝트'}를 탐색하세요
             </p>
           </div>
-          {user && (
+          {isAdmin && (
             <Link href="/projects/new">
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
@@ -98,7 +98,7 @@ export default function ProjectsPage() {
                 className="pl-10"
               />
             </div>
-            {user && (
+            {isAdmin && (
               <div className="flex gap-2">
                 <Button
                   variant={showMyProjects ? 'default' : 'outline'}

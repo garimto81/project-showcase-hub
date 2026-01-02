@@ -1,20 +1,23 @@
 import { test, expect } from '@playwright/test'
 
 test.describe('네비게이션', () => {
-  test('비인증 사용자가 /projects 접근 시 로그인으로 리다이렉트된다', async ({ page }) => {
+  test('비인증 사용자도 /projects 페이지에 접근할 수 있다', async ({ page }) => {
     await page.goto('/projects')
 
-    // 로그인 페이지로 리다이렉트되거나 로그인 요청 메시지 표시
-    await page.waitForURL(/\/(login|projects)/)
+    // 프로젝트 페이지가 표시됨 (공개 접근 가능)
+    await page.waitForURL(/\/projects/)
+    expect(page.url()).toContain('/projects')
 
-    const url = page.url()
-    if (url.includes('/login')) {
-      // 리다이렉트 성공
-      expect(url).toContain('/login')
-    } else {
-      // 프로젝트 페이지가 표시되면 로그인 상태일 수 있음
-      expect(url).toContain('/projects')
-    }
+    // 프로젝트 목록 헤더가 표시되는지 확인
+    await expect(page.getByRole('heading', { name: '프로젝트' })).toBeVisible()
+  })
+
+  test('비인증 사용자가 /projects/new 접근 시 로그인으로 리다이렉트된다', async ({ page }) => {
+    await page.goto('/projects/new')
+
+    // Admin 전용 라우트이므로 로그인 페이지로 리다이렉트
+    await page.waitForURL(/\/login/)
+    expect(page.url()).toContain('/login')
   })
 
   test('페이지 간 네비게이션이 정상적으로 작동한다', async ({ page }) => {

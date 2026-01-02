@@ -10,6 +10,7 @@ type AuthContextType = {
   user: User | null
   session: Session | null
   loading: boolean
+  isAdmin: boolean
   signIn: (email: string, password: string) => Promise<AuthResult>
   signUp: (email: string, password: string, displayName?: string) => Promise<AuthResult>
   signInWithOAuth: (provider: 'github' | 'google', next?: string) => Promise<void>
@@ -138,9 +139,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return identities.some(identity => identity.provider === 'github')
   }, [user])
 
+  // Admin 권한 확인 (환경변수로 설정된 사용자 ID와 일치하면 Admin)
+  const isAdmin = useMemo(() => {
+    if (!user) return false
+    const adminUserId = process.env.NEXT_PUBLIC_ADMIN_USER_ID
+    // ADMIN_USER_ID가 설정되지 않으면 모든 로그인 사용자를 Admin으로 취급 (개발 편의)
+    if (!adminUserId) return true
+    return user.id === adminUserId
+  }, [user])
+
   const value = useMemo(
-    () => ({ user, session, loading, signIn, signUp, signInWithOAuth, signOut, linkGitHubAccount, hasGitHubLinked }),
-    [user, session, loading, signIn, signUp, signInWithOAuth, signOut, linkGitHubAccount, hasGitHubLinked]
+    () => ({ user, session, loading, isAdmin, signIn, signUp, signInWithOAuth, signOut, linkGitHubAccount, hasGitHubLinked }),
+    [user, session, loading, isAdmin, signIn, signUp, signInWithOAuth, signOut, linkGitHubAccount, hasGitHubLinked]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
