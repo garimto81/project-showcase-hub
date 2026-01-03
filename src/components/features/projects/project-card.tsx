@@ -12,10 +12,17 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Star, ExternalLink, StarOff } from 'lucide-react'
-import type { ProjectWithProfile } from '@/types/database'
+import type { ProjectWithProfile, ProjectMetadata } from '@/types/database'
+import { TechStackTags } from './tech-stack-tags'
+import { ProjectStatusDot } from './project-status-badge'
+import { GitHubStarsCompact } from './github-info-section'
+
+type ProjectWithOptionalMetadata = ProjectWithProfile & {
+  project_metadata?: ProjectMetadata | null
+}
 
 type ProjectCardProps = {
-  project: ProjectWithProfile
+  project: ProjectWithOptionalMetadata
   averageRating?: number
   onToggleFavorite?: (projectId: string, isFavorite: boolean) => void
 }
@@ -81,13 +88,22 @@ export function ProjectCard({
               {project.is_favorite && !project.thumbnail_url && (
                 <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 flex-shrink-0" />
               )}
+              {/* 프로젝트 상태 점 */}
+              {project.project_metadata?.status && project.project_metadata.status !== 'unknown' && (
+                <ProjectStatusDot status={project.project_metadata.status} />
+              )}
             </div>
-            {averageRating !== undefined && averageRating > 0 && (
-              <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                <span>{averageRating.toFixed(1)}</span>
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              {/* GitHub Stars */}
+              <GitHubStarsCompact stars={project.project_metadata?.github_stars} />
+              {/* 평균 별점 */}
+              {averageRating !== undefined && averageRating > 0 && (
+                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                  <span>{averageRating.toFixed(1)}</span>
+                </div>
+              )}
+            </div>
           </div>
           {project.description && (
             <CardDescription className="line-clamp-2">
@@ -96,6 +112,16 @@ export function ProjectCard({
           )}
         </CardHeader>
         <CardContent className="space-y-3">
+          {/* 기술 스택 태그 (최대 3개) */}
+          {project.project_metadata && (
+            <TechStackTags
+              techStack={project.project_metadata.tech_stack || []}
+              language={project.project_metadata.github_language}
+              topics={project.project_metadata.github_topics || []}
+              maxTags={3}
+            />
+          )}
+
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Avatar className="h-6 w-6">
               <AvatarImage src={project.profiles?.avatar_url || undefined} />

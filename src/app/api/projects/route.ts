@@ -24,6 +24,18 @@ export async function GET(request: Request) {
         id,
         display_name,
         avatar_url
+      ),
+      project_metadata (
+        id,
+        tech_stack,
+        screenshots,
+        status,
+        github_stars,
+        github_forks,
+        github_language,
+        github_topics,
+        github_last_pushed_at,
+        github_last_synced_at
       )
     `, { count: 'exact' })
     .order('created_at', { ascending: false })
@@ -85,6 +97,11 @@ export async function POST(request: Request) {
   if (error) {
     return apiError.serverError(error.message)
   }
+
+  // 메타데이터 레코드 자동 생성
+  await supabase.from('project_metadata').insert({
+    project_id: data.id,
+  })
 
   return apiSuccess.created(data)
 }

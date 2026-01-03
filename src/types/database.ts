@@ -1,6 +1,7 @@
 // MVP 추가 타입
 export type AppType = 'web_app' | 'pwa' | 'api' | 'docker'
 export type ScanStatus = 'idle' | 'scanning' | 'completed' | 'error'
+export type ProjectStatus = 'active' | 'maintained' | 'archived' | 'unknown'
 
 export interface ScanResult {
   totalRepos: number
@@ -191,6 +192,58 @@ export type Database = {
           }
         ]
       }
+      project_metadata: {
+        Row: {
+          id: string
+          project_id: string
+          tech_stack: string[]
+          screenshots: string[]
+          status: ProjectStatus
+          github_stars: number
+          github_forks: number
+          github_language: string | null
+          github_topics: string[]
+          github_last_pushed_at: string | null
+          github_last_synced_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          project_id: string
+          tech_stack?: string[]
+          screenshots?: string[]
+          status?: ProjectStatus
+          github_stars?: number
+          github_forks?: number
+          github_language?: string | null
+          github_topics?: string[]
+          github_last_pushed_at?: string | null
+          github_last_synced_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          tech_stack?: string[]
+          screenshots?: string[]
+          status?: ProjectStatus
+          github_stars?: number
+          github_forks?: number
+          github_language?: string | null
+          github_topics?: string[]
+          github_last_pushed_at?: string | null
+          github_last_synced_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'project_metadata_project_id_fkey'
+            columns: ['project_id']
+            referencedRelation: 'projects'
+            referencedColumns: ['id']
+          }
+        ]
+      }
     }
     // eslint-disable-next-line @typescript-eslint/no-empty-object-type
     Views: {}
@@ -206,10 +259,16 @@ export type Profile = Database['public']['Tables']['profiles']['Row']
 export type Project = Database['public']['Tables']['projects']['Row']
 export type Rating = Database['public']['Tables']['ratings']['Row']
 export type Comment = Database['public']['Tables']['comments']['Row']
+export type ProjectMetadata = Database['public']['Tables']['project_metadata']['Row']
 
 // 프로필 정보가 포함된 타입
 export type ProjectWithProfile = Project & {
   profiles: Pick<Profile, 'id' | 'display_name' | 'avatar_url'> | null
+}
+
+// 메타데이터가 포함된 프로젝트 타입
+export type ProjectWithMetadata = ProjectWithProfile & {
+  project_metadata: ProjectMetadata | null
 }
 
 export type RatingWithProfile = Rating & {

@@ -24,6 +24,18 @@ export async function GET(request: Request, context: RouteContext) {
         id,
         display_name,
         avatar_url
+      ),
+      project_metadata (
+        id,
+        tech_stack,
+        screenshots,
+        status,
+        github_stars,
+        github_forks,
+        github_language,
+        github_topics,
+        github_last_pushed_at,
+        github_last_synced_at
       )
     `)
     .eq('id', projectId)
@@ -53,15 +65,23 @@ export async function PATCH(request: Request, context: RouteContext) {
   if (ownershipResult.error) return ownershipResult.error
 
   // JSON 파싱
-  const bodyResult = await parseJsonBody<{ title?: string; description?: string; thumbnail_url?: string }>(request)
+  const bodyResult = await parseJsonBody<{
+    title?: string
+    description?: string
+    thumbnail_url?: string
+    url?: string
+    github_repo?: string
+  }>(request)
   if (bodyResult.error) return bodyResult.error
 
-  const { title, description, thumbnail_url } = bodyResult.data
+  const { title, description, thumbnail_url, url, github_repo } = bodyResult.data
 
   const updateData: Record<string, unknown> = {}
   if (title !== undefined) updateData.title = title.trim()
   if (description !== undefined) updateData.description = description?.trim() || null
   if (thumbnail_url !== undefined) updateData.thumbnail_url = thumbnail_url || null
+  if (url !== undefined) updateData.url = url?.trim() || null
+  if (github_repo !== undefined) updateData.github_repo = github_repo?.trim() || null
 
   const { data, error } = await supabase
     .from('projects')

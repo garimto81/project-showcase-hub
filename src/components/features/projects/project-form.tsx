@@ -18,8 +18,9 @@ type ProjectFormProps = {
     description: string | null
     thumbnail_url: string | null
     url: string | null
+    github_repo: string | null
   }
-  onSubmit: (data: { title: string; description?: string; thumbnail_url?: string; url?: string }) => Promise<void>
+  onSubmit: (data: { title: string; description?: string; thumbnail_url?: string; url?: string; github_repo?: string }) => Promise<void>
 }
 
 export function ProjectForm({ mode, initialData, onSubmit }: ProjectFormProps) {
@@ -28,6 +29,7 @@ export function ProjectForm({ mode, initialData, onSubmit }: ProjectFormProps) {
   const [description, setDescription] = useState(initialData?.description || '')
   const [thumbnailUrl, setThumbnailUrl] = useState(initialData?.thumbnail_url || '')
   const [demoUrl, setDemoUrl] = useState(initialData?.url || '')
+  const [githubRepo, setGithubRepo] = useState(initialData?.github_repo || '')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,6 +43,7 @@ export function ProjectForm({ mode, initialData, onSubmit }: ProjectFormProps) {
         description: description.trim() || undefined,
         thumbnail_url: thumbnailUrl.trim() || undefined,
         url: demoUrl.trim() || undefined,
+        github_repo: githubRepo.trim() || undefined,
       })
       toast.success(mode === 'create' ? '프로젝트가 생성되었습니다' : '프로젝트가 수정되었습니다')
       router.push('/projects')
@@ -125,6 +128,20 @@ export function ProjectForm({ mode, initialData, onSubmit }: ProjectFormProps) {
             />
             <p className="text-sm text-muted-foreground">
               실제 배포된 앱의 URL을 입력하면 프로젝트 카드에서 바로 열 수 있습니다
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="githubRepo">GitHub 레포지토리</Label>
+            <Input
+              id="githubRepo"
+              placeholder="owner/repo (예: garimto81/heritage_shop)"
+              value={githubRepo}
+              onChange={(e) => setGithubRepo(e.target.value)}
+              disabled={isSubmitting}
+            />
+            <p className="text-sm text-muted-foreground">
+              GitHub 레포지토리를 연결하면 Stars, 기술 스택 등을 자동으로 가져옵니다
             </p>
           </div>
         </CardContent>

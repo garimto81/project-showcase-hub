@@ -115,6 +115,7 @@ describe('ProjectForm', () => {
       description: '기존 설명',
       thumbnail_url: 'https://example.com/old.jpg',
       url: 'https://my-app.vercel.app',
+      github_repo: 'owner/repo',
     }
 
     it('수정 모드 폼을 렌더링한다', () => {
@@ -156,6 +157,7 @@ describe('ProjectForm', () => {
           description: '기존 설명',
           thumbnail_url: 'https://example.com/old.jpg',
           url: 'https://my-app.vercel.app',
+          github_repo: 'owner/repo',
         })
       })
     })
