@@ -1,5 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import {
+  requireAuth,
+  requireOwnership,
+  parseJsonBody,
+  apiError,
+  apiSuccess,
+} from '@/lib/api/utils'
 
 // PATCH: 댓글 수정
 export async function PATCH(
@@ -9,32 +16,22 @@ export async function PATCH(
   const { commentId } = await params
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return NextResponse.json({ error: '로그인이 필요합니다' }, { status: 401 })
-  }
+  // 인증 확인
+  const authResult = await requireAuth(supabase)
+  if (authResult.error) return authResult.error
 
-  const body = await request.json()
-  const { content } = body
+  // JSON 파싱
+  const bodyResult = await parseJsonBody<{ content?: string }>(request)
+  if (bodyResult.error) return bodyResult.error
 
+  const { content } = bodyResult.data
   if (!content?.trim()) {
-    return NextResponse.json({ error: '댓글 내용을 입력해주세요' }, { status: 400 })
+    return apiError.badRequest('댓글 내용을 입력해주세요')
   }
 
   // 본인 댓글인지 확인
-  const { data: comment } = await supabase
-    .from('comments')
-    .select('user_id')
-    .eq('id', commentId)
-    .single()
-
-  if (!comment) {
-    return NextResponse.json({ error: '댓글을 찾을 수 없습니다' }, { status: 404 })
-  }
-
-  if (comment.user_id !== user.id) {
-    return NextResponse.json({ error: '수정 권한이 없습니다' }, { status: 403 })
-  }
+  const ownershipResult = await requireOwnership(supabase, 'comments', commentId, authResult.user.id)
+  if (ownershipResult.error) return ownershipResult.error
 
   const { data, error } = await supabase
     .from('comments')
@@ -47,10 +44,10 @@ export async function PATCH(
     .single()
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return apiError.serverError(error.message)
   }
 
-  return NextResponse.json(data)
+  return apiSuccess.ok(data)
 }
 
 // DELETE: 댓글 삭제
@@ -61,25 +58,13 @@ export async function DELETE(
   const { commentId } = await params
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return NextResponse.json({ error: '로그인이 필요합니다' }, { status: 401 })
-  }
+  // 인증 확인
+  const authResult = await requireAuth(supabase)
+  if (authResult.error) return authResult.error
 
   // 본인 댓글인지 확인
-  const { data: comment } = await supabase
-    .from('comments')
-    .select('user_id')
-    .eq('id', commentId)
-    .single()
-
-  if (!comment) {
-    return NextResponse.json({ error: '댓글을 찾을 수 없습니다' }, { status: 404 })
-  }
-
-  if (comment.user_id !== user.id) {
-    return NextResponse.json({ error: '삭제 권한이 없습니다' }, { status: 403 })
-  }
+  const ownershipResult = await requireOwnership(supabase, 'comments', commentId, authResult.user.id)
+  if (ownershipResult.error) return ownershipResult.error
 
   const { error } = await supabase
     .from('comments')
@@ -87,8 +72,8 @@ export async function DELETE(
     .eq('id', commentId)
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return apiError.serverError(error.message)
   }
 
-  return NextResponse.json({ success: true })
+  return apiSuccess.deleted()
 }

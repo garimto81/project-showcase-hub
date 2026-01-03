@@ -40,3 +40,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# test screenshots
+test-*.png
+
+# Playwright
+/playwright-report/
+/test-results/
+/tests/e2e/.auth/
+
+# Windows temp files
+nul

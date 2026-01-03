@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -53,7 +54,9 @@ export default async function ProjectPage({
 
   const ownerName = project.profiles?.display_name || '익명'
   const ownerInitial = ownerName.charAt(0).toUpperCase()
-  const isOwner = currentUser?.id === project.owner_id
+  // Admin 권한 체크: 환경변수 미설정 시 모든 로그인 사용자가 Admin
+  const adminUserId = process.env.NEXT_PUBLIC_ADMIN_USER_ID
+  const isAdmin = currentUser ? (!adminUserId || currentUser.id === adminUserId) : false
   const createdAt = new Date(project.created_at).toLocaleDateString('ko-KR')
 
   return (
@@ -61,11 +64,13 @@ export default async function ProjectPage({
       {/* 프로젝트 헤더 */}
       <Card>
         {project.thumbnail_url && (
-          <div className="aspect-video w-full overflow-hidden rounded-t-lg">
-            <img
+          <div className="aspect-video w-full overflow-hidden rounded-t-lg relative">
+            <Image
               src={project.thumbnail_url}
               alt={project.title}
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
+              unoptimized
             />
           </div>
         )}
@@ -77,7 +82,7 @@ export default async function ProjectPage({
                 {createdAt}에 생성됨
               </CardDescription>
             </div>
-            {isOwner && <ProjectActions projectId={id} />}
+            {isAdmin && <ProjectActions projectId={id} />}
           </div>
         </CardHeader>
         <CardContent className="space-y-4">

@@ -1,24 +1,13 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ChevronRight } from 'lucide-react'
-
-type Project = {
-  id: string
-  title: string
-  description: string | null
-  thumbnail_url: string | null
-  created_at: string
-  profiles: {
-    id: string
-    display_name: string | null
-    avatar_url: string | null
-  } | null
-}
+import type { ProjectWithProfile } from '@/types/database'
 
 type ListViewProps = {
-  projects: Project[]
+  projects: ProjectWithProfile[]
 }
 
 export function ListView({ projects }: ListViewProps) {
@@ -44,12 +33,14 @@ export function ListView({ projects }: ListViewProps) {
             className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors"
           >
             {/* 썸네일 */}
-            <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+            <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0 relative">
               {project.thumbnail_url ? (
-                <img
+                <Image
                   src={project.thumbnail_url}
                   alt={project.title}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
+                  unoptimized
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">

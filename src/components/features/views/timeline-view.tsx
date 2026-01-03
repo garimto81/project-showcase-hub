@@ -1,23 +1,12 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-
-type Project = {
-  id: string
-  title: string
-  description: string | null
-  thumbnail_url: string | null
-  created_at: string
-  profiles: {
-    id: string
-    display_name: string | null
-    avatar_url: string | null
-  } | null
-}
+import type { ProjectWithProfile } from '@/types/database'
 
 type TimelineViewProps = {
-  projects: Project[]
+  projects: ProjectWithProfile[]
 }
 
 export function TimelineView({ projects }: TimelineViewProps) {
@@ -63,11 +52,13 @@ export function TimelineView({ projects }: TimelineViewProps) {
                 <div className="flex gap-4">
                   {/* 썸네일 */}
                   {project.thumbnail_url && (
-                    <div className="w-20 h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-                      <img
+                    <div className="w-20 h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0 relative">
+                      <Image
                         src={project.thumbnail_url}
                         alt={project.title}
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
+                        unoptimized
                       />
                     </div>
                   )}

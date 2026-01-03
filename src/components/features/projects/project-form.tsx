@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -16,8 +17,9 @@ type ProjectFormProps = {
     title: string
     description: string | null
     thumbnail_url: string | null
+    url: string | null
   }
-  onSubmit: (data: { title: string; description?: string; thumbnail_url?: string }) => Promise<void>
+  onSubmit: (data: { title: string; description?: string; thumbnail_url?: string; url?: string }) => Promise<void>
 }
 
 export function ProjectForm({ mode, initialData, onSubmit }: ProjectFormProps) {
@@ -25,6 +27,7 @@ export function ProjectForm({ mode, initialData, onSubmit }: ProjectFormProps) {
   const [title, setTitle] = useState(initialData?.title || '')
   const [description, setDescription] = useState(initialData?.description || '')
   const [thumbnailUrl, setThumbnailUrl] = useState(initialData?.thumbnail_url || '')
+  const [demoUrl, setDemoUrl] = useState(initialData?.url || '')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,6 +40,7 @@ export function ProjectForm({ mode, initialData, onSubmit }: ProjectFormProps) {
         title: title.trim(),
         description: description.trim() || undefined,
         thumbnail_url: thumbnailUrl.trim() || undefined,
+        url: demoUrl.trim() || undefined,
       })
       toast.success(mode === 'create' ? '프로젝트가 생성되었습니다' : '프로젝트가 수정되었습니다')
       router.push('/projects')
@@ -94,17 +98,34 @@ export function ProjectForm({ mode, initialData, onSubmit }: ProjectFormProps) {
               disabled={isSubmitting}
             />
             {thumbnailUrl && (
-              <div className="mt-2 aspect-video max-w-xs overflow-hidden rounded-lg border">
-                <img
+              <div className="mt-2 aspect-video max-w-xs overflow-hidden rounded-lg border relative">
+                <Image
                   src={thumbnailUrl}
                   alt="썸네일 미리보기"
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
+                  unoptimized
                   onError={(e) => {
                     e.currentTarget.style.display = 'none'
                   }}
                 />
               </div>
             )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="demoUrl">배포 앱 URL</Label>
+            <Input
+              id="demoUrl"
+              type="url"
+              placeholder="https://your-app.vercel.app"
+              value={demoUrl}
+              onChange={(e) => setDemoUrl(e.target.value)}
+              disabled={isSubmitting}
+            />
+            <p className="text-sm text-muted-foreground">
+              실제 배포된 앱의 URL을 입력하면 프로젝트 카드에서 바로 열 수 있습니다
+            </p>
           </div>
         </CardContent>
         <CardFooter className="flex gap-4">

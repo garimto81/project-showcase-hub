@@ -1,23 +1,10 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-
-type Project = {
-  id: string
-  title: string
-  description: string | null
-  thumbnail_url: string | null
-  created_at: string
-  owner_id: string
-  profiles: {
-    id: string
-    display_name: string | null
-    avatar_url: string | null
-  } | null
-}
+import type { ProjectWithProfile, AppType } from '@/types/database'
 
 type ProjectsResponse = {
-  projects: Project[]
+  projects: ProjectWithProfile[]
   total: number
   limit: number
   offset: number
@@ -27,11 +14,32 @@ type UseProjectsOptions = {
   userId?: string
   search?: string
   limit?: number
+  favoritesOnly?: boolean
+}
+
+type CreateProjectData = {
+  title: string
+  description?: string | null
+  thumbnail_url?: string | null
+  url?: string | null
+  app_type?: AppType
+  is_favorite?: boolean
+  github_repo?: string | null
+  owner_id?: string
+}
+
+type UpdateProjectData = {
+  title?: string
+  description?: string | null
+  thumbnail_url?: string | null
+  url?: string | null
+  app_type?: AppType
+  is_favorite?: boolean
 }
 
 export function useProjects(options: UseProjectsOptions = {}) {
-  const { userId, search, limit = 20 } = options
-  const [projects, setProjects] = useState<Project[]>([])
+  const { userId, search, limit = 20, favoritesOnly } = options
+  const [projects, setProjects] = useState<ProjectWithProfile[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -44,6 +52,7 @@ export function useProjects(options: UseProjectsOptions = {}) {
       const params = new URLSearchParams()
       if (userId) params.set('userId', userId)
       if (search) params.set('search', search)
+      if (favoritesOnly) params.set('favoritesOnly', 'true')
       params.set('limit', limit.toString())
       params.set('offset', offset.toString())
 
@@ -51,36 +60,62 @@ export function useProjects(options: UseProjectsOptions = {}) {
       const data: ProjectsResponse = await response.json()
 
       if (!response.ok) {
-        throw new Error((data as unknown as { error: string }).error || '프로젝트를 불러오는데 실패했습니다')
+        throw new Error(
+          (data as unknown as { error: string }).error ||
+            '프로젝트를 불러오는데 실패했습니다'
+        )
       }
 
       setProjects(data.projects)
       setTotal(data.total)
     } catch (err) {
-      setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다')
+      setError(
+        err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다'
+      )
     } finally {
       setLoading(false)
     }
-  }, [userId, search, limit])
+  }, [userId, search, limit, favoritesOnly])
 
-  const createProject = async (data: { title: string; description?: string; thumbnail_url?: string }) => {
-    const response = await fetch('/api/projects', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    })
+  const create = async (
+    data: CreateProjectData
+  ): Promise<{ data: ProjectWithProfile | null; error: string | null }> => {
+    try {
+      const response = await fetch('/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
 
-    const result = await response.json()
+      const result = await response.json()
 
-    if (!response.ok) {
-      throw new Error(result.error || '프로젝트 생성에 실패했습니다')
+      if (!response.ok) {
+        return {
+          data: null,
+          error: result.error || '프로젝트 생성에 실패했습니다',
+        }
+      }
+
+      return { data: result as ProjectWithProfile, error: null }
+    } catch (err) {
+      return {
+        data: null,
+        error:
+          err instanceof Error ? err.message : '프로젝트 생성에 실패했습니다',
+      }
     }
-
-    await fetchProjects()
-    return result as Project
   }
 
-  const updateProject = async (id: string, data: { title?: string; description?: string; thumbnail_url?: string }) => {
+  const createProject = async (data: CreateProjectData) => {
+    const { data: result, error } = await create(data)
+    if (error) {
+      throw new Error(error)
+    }
+    await fetchProjects()
+    return result
+  }
+
+  const updateProject = async (id: string, data: UpdateProjectData) => {
     const response = await fetch(`/api/projects/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -94,7 +129,7 @@ export function useProjects(options: UseProjectsOptions = {}) {
     }
 
     await fetchProjects()
-    return result as Project
+    return result as ProjectWithProfile
   }
 
   const deleteProject = async (id: string) => {
@@ -110,6 +145,36 @@ export function useProjects(options: UseProjectsOptions = {}) {
     await fetchProjects()
   }
 
+  const toggleFavorite = async (id: string, isFavorite: boolean) => {
+    // 낙관적 업데이트
+    setProjects((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, is_favorite: isFavorite } : p))
+    )
+
+    try {
+      const response = await fetch(`/api/projects/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_favorite: isFavorite }),
+      })
+
+      if (!response.ok) {
+        // 실패 시 롤백
+        setProjects((prev) =>
+          prev.map((p) => (p.id === id ? { ...p, is_favorite: !isFavorite } : p))
+        )
+        const result = await response.json()
+        throw new Error(result.error || '즐겨찾기 변경에 실패했습니다')
+      }
+    } catch (err) {
+      // 에러 시 롤백
+      setProjects((prev) =>
+        prev.map((p) => (p.id === id ? { ...p, is_favorite: !isFavorite } : p))
+      )
+      throw err
+    }
+  }
+
   useEffect(() => {
     fetchProjects()
   }, [fetchProjects])
@@ -120,8 +185,10 @@ export function useProjects(options: UseProjectsOptions = {}) {
     loading,
     error,
     refetch: fetchProjects,
+    create,
     createProject,
     updateProject,
     deleteProject,
+    toggleFavorite,
   }
 }
