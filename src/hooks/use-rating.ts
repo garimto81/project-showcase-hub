@@ -12,7 +12,7 @@ interface RatingData {
 }
 
 export function useRating(projectId: string) {
-  const { user } = useAuth()
+  const { isAuthenticated } = useAuth()
   const [data, setData] = useState<RatingData>({
     ratings: [],
     average: 0,
@@ -23,7 +23,7 @@ export function useRating(projectId: string) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const userId = user?.id
+  const userId = undefined // TODO: 사용자 ID 로직 재구성 필요
 
   const fetchRatings = useCallback(async () => {
     try {
@@ -58,7 +58,7 @@ export function useRating(projectId: string) {
   }, [fetchRatings])
 
   const submitRating = async (score: number) => {
-    if (!user) return
+    if (!isAuthenticated) return
 
     try {
       const response = await fetch(`/api/projects/${projectId}/ratings`, {
@@ -79,7 +79,7 @@ export function useRating(projectId: string) {
   }
 
   const deleteRating = async () => {
-    if (!user) return
+    if (!isAuthenticated) return
 
     try {
       const response = await fetch(`/api/projects/${projectId}/ratings`, {

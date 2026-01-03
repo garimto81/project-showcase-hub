@@ -70,7 +70,7 @@ export async function POST(request: Request) {
   const supabase = await createClient()
 
   // 인증 확인
-  const authResult = await requireAuth(supabase)
+  const authResult = await requireAuth()
   if (authResult.error) return authResult.error
 
   // JSON 파싱

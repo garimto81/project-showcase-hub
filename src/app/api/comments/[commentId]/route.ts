@@ -17,7 +17,7 @@ export async function PATCH(
   const supabase = await createClient()
 
   // 인증 확인
-  const authResult = await requireAuth(supabase)
+  const authResult = await requireAuth()
   if (authResult.error) return authResult.error
 
   // JSON 파싱
@@ -30,7 +30,7 @@ export async function PATCH(
   }
 
   // 본인 댓글인지 확인
-  const ownershipResult = await requireOwnership(supabase, 'comments', commentId, authResult.user.id)
+  const ownershipResult = await requireOwnership('comments', commentId)
   if (ownershipResult.error) return ownershipResult.error
 
   const { data, error } = await supabase
@@ -59,11 +59,11 @@ export async function DELETE(
   const supabase = await createClient()
 
   // 인증 확인
-  const authResult = await requireAuth(supabase)
+  const authResult = await requireAuth()
   if (authResult.error) return authResult.error
 
   // 본인 댓글인지 확인
-  const ownershipResult = await requireOwnership(supabase, 'comments', commentId, authResult.user.id)
+  const ownershipResult = await requireOwnership('comments', commentId)
   if (ownershipResult.error) return ownershipResult.error
 
   const { error } = await supabase

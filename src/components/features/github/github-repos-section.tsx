@@ -31,21 +31,11 @@ function ReposSkeleton() {
 
 export function GitHubReposSection() {
   const router = useRouter()
-  const { user, hasGitHubLinked, linkGitHubAccount } = useAuth()
+  const { isAuthenticated } = useAuth()
   const { repos, loading, error, refetch } = useGitHubRepos()
   const { createProject } = useProjects()
-  const [isLinking, setIsLinking] = useState(false)
   const [selectedRepos, setSelectedRepos] = useState<Set<number>>(new Set())
   const [isCreating, setIsCreating] = useState(false)
-
-  const handleLinkGitHub = async () => {
-    setIsLinking(true)
-    try {
-      await linkGitHubAccount('/projects/new')
-    } finally {
-      setIsLinking(false)
-    }
-  }
 
   const handleToggleRepo = (repoId: number) => {
     setSelectedRepos(prev => {
@@ -92,20 +82,12 @@ export function GitHubReposSection() {
     }
   }
 
-  if (!user) {
-    return null
-  }
-
-  if (!hasGitHubLinked) {
+  if (!isAuthenticated) {
     return (
       <div className="text-center py-12 text-muted-foreground">
         <Github className="h-12 w-12 mx-auto mb-4 opacity-50" />
-        <p className="text-lg font-medium mb-2">GitHub 계정을 연동하세요</p>
-        <p className="text-sm mb-6">GitHub 레포지토리를 가져오려면 GitHub 계정 연동이 필요합니다.</p>
-        <Button onClick={handleLinkGitHub} disabled={isLinking}>
-          <Link2 className="h-4 w-4 mr-2" />
-          {isLinking ? '연동 중...' : 'GitHub 계정 연동하기'}
-        </Button>
+        <p className="text-lg font-medium mb-2">로그인이 필요합니다</p>
+        <p className="text-sm mb-6">GitHub 레포지토리를 가져오려면 로그인이 필요합니다.</p>
       </div>
     )
   }

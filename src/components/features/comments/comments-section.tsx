@@ -11,7 +11,7 @@ interface CommentsSectionProps {
 }
 
 export function CommentsSection({ projectId }: CommentsSectionProps) {
-  const { user, loading: authLoading } = useAuth()
+  const { isAuthenticated, loading: authLoading } = useAuth()
   const { comments, loading, addComment, updateComment, deleteComment } = useComments(projectId)
 
   if (loading) {
@@ -35,7 +35,7 @@ export function CommentsSection({ projectId }: CommentsSectionProps) {
       {/* 댓글 작성 폼 */}
       {!authLoading && (
         <div>
-          {user ? (
+          {isAuthenticated ? (
             <CommentForm
               onSubmit={addComment}
               placeholder="댓글을 남겨주세요..."

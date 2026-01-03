@@ -2,11 +2,11 @@
 
 | 항목 | 값 |
 |------|---|
-| **Version** | 2.1.0 |
+| **Version** | 2.2.0 |
 | **Status** | In Progress |
 | **Priority** | P0 |
 | **Created** | 2025-12-26 |
-| **Updated** | 2026-01-02 |
+| **Updated** | 2026-01-03 |
 | **License** | MIT |
 | **Repository** | `D:\AI\claude01\project-showcase-hub` |
 
@@ -56,8 +56,26 @@
 | **UI** | Tailwind CSS | v4 | 유틸리티 기반 |
 | **Components** | shadcn/ui | latest (new-york) | 접근성, 커스터마이징 |
 | **Database** | Supabase | PostgreSQL | 오픈소스, RLS |
-| **Auth** | Supabase Auth | - | Email, GitHub, Google OAuth |
+| **Auth** | 환경변수 인증 | - | ADMIN_PASSWORD 기반 세션 (v2.2) |
+| **GitHub API** | 공개 API | - | OAuth 불필요, /users/{username}/repos |
 | **Deploy** | Vercel | - | Edge Network |
+
+### 2.1 인증 시스템 단순화 (v2.2)
+
+**변경 배경**: 개인 전용 앱이므로 다중 사용자 인증 불필요
+
+| 기존 (v2.1) | 변경 (v2.2) |
+|-------------|-------------|
+| Supabase Auth | 환경변수 비밀번호 |
+| Email/Password + OAuth | ADMIN_PASSWORD 단일 인증 |
+| GitHub OAuth 토큰 | 공개 GitHub API |
+| 다중 사용자 지원 | 단일 Admin 사용자 |
+
+**환경변수**:
+```bash
+ADMIN_PASSWORD=your-secure-password
+GITHUB_USERNAME=garimto81
+```
 
 ---
 

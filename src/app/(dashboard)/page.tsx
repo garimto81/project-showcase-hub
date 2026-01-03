@@ -42,42 +42,16 @@ function ProjectsSkeleton() {
   )
 }
 
-function WelcomeCard({
-  onLinkGitHub,
-  isLoading,
-}: {
-  onLinkGitHub: () => void
-  isLoading: boolean
-}) {
-  return (
-    <Card className="border-dashed">
-      <CardHeader className="text-center">
-        <Rocket className="h-12 w-12 mx-auto text-primary mb-2" />
-        <CardTitle>AppHub에 오신 것을 환영합니다!</CardTitle>
-      </CardHeader>
-      <CardContent className="text-center space-y-4">
-        <p className="text-muted-foreground">
-          GitHub 계정을 연동하면 배포된 앱을 자동으로 찾아서 마켓에
-          등록해드립니다.
-        </p>
-        <Button onClick={onLinkGitHub} disabled={isLoading} size="lg">
-          <Github className="mr-2 h-5 w-5" />
-          GitHub 계정 연동
-        </Button>
-      </CardContent>
-    </Card>
-  )
-}
 
 export default function DashboardPage() {
-  const { user, hasGitHubLinked, linkGitHubAccount } = useAuth()
+  const { isAuthenticated } = useAuth()
   const [search, setSearch] = useState('')
   const [showMyProjects, setShowMyProjects] = useState(false)
   const [viewMode, setViewMode] = useState<ViewMode>('gallery')
   const [showScanResult, setShowScanResult] = useState(false)
 
   const { projects, loading, error, refetch, create } = useProjects({
-    userId: showMyProjects && user ? user.id : undefined,
+    userId: showMyProjects && isAuthenticated ? undefined : undefined, // TODO: 사용자 ID 로직 재구성 필요
     search: search || undefined,
   })
 
@@ -92,31 +66,7 @@ export default function DashboardPage() {
     }
   }, [scanner, refetch])
 
-  // GitHub 연동 후 자동 스캔 (최초 1회)
-  useEffect(() => {
-    const shouldAutoScan =
-      hasGitHubLinked &&
-      projects.length === 0 &&
-      !loading &&
-      !scanner.isScanning &&
-      !scanner.isCompleted &&
-      !autoScanTriggeredRef.current &&
-      typeof window !== 'undefined' &&
-      !sessionStorage.getItem('apphub_scanned')
-
-    if (shouldAutoScan) {
-      autoScanTriggeredRef.current = true
-      sessionStorage.setItem('apphub_scanned', 'true')
-      // startTransition으로 감싸서 setState 경고 회피
-      startTransition(() => {
-        handleScan()
-      })
-    }
-  }, [hasGitHubLinked, projects.length, loading, scanner.isScanning, scanner.isCompleted, handleScan])
-
-  const handleLinkGitHub = async () => {
-    await linkGitHubAccount('/projects')
-  }
+  // 자동 스캔 로직 제거 (GitHub 연동 상태 확인 불가)
 
   const handleViewApps = () => {
     setShowScanResult(false)
@@ -129,14 +79,14 @@ export default function DashboardPage() {
     description: string
     thumbnailUrl?: string
   }) => {
-    if (!user) return false
+    if (!isAuthenticated) return false
 
     const { error } = await create({
       title: app.title,
       description: app.description || null,
       url: app.url,
       thumbnail_url: app.thumbnailUrl || null,
-      owner_id: user.id,
+      owner_id: '', // TODO: 사용자 ID 로직 재구성 필요
     })
 
     if (!error) {
@@ -195,15 +145,6 @@ export default function DashboardPage() {
     )
   }
 
-  // GitHub 미연동 상태
-  if (user && !hasGitHubLinked) {
-    return (
-      <div className="container py-8 max-w-2xl mx-auto">
-        <WelcomeCard onLinkGitHub={handleLinkGitHub} isLoading={false} />
-      </div>
-    )
-  }
-
   return (
     <div className="container py-8">
       <div className="flex flex-col gap-6">
@@ -216,7 +157,7 @@ export default function DashboardPage() {
             </p>
           </div>
           <div className="flex gap-2">
-            {user && hasGitHubLinked && (
+            {isAuthenticated && (
               <>
                 <Button
                   variant="outline"
@@ -230,15 +171,13 @@ export default function DashboardPage() {
                   다시 스캔
                 </Button>
                 <ManualAddDialog onAdd={handleManualAdd} />
+                <Link href="/projects/new">
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    새 앱
+                  </Button>
+                </Link>
               </>
-            )}
-            {user && (
-              <Link href="/projects/new">
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  새 앱
-                </Button>
-              </Link>
             )}
           </div>
         </div>
@@ -255,7 +194,7 @@ export default function DashboardPage() {
                 className="pl-10"
               />
             </div>
-            {user && (
+            {isAuthenticated && (
               <div className="flex gap-2">
                 <Button
                   variant={showMyProjects ? 'default' : 'outline'}
@@ -286,7 +225,7 @@ export default function DashboardPage() {
         )}
 
         {/* 앱이 없을 때 안내 */}
-        {!loading && projects.length === 0 && user && hasGitHubLinked && (
+        {!loading && projects.length === 0 && isAuthenticated && (
           <Card className="border-dashed">
             <CardContent className="py-12 text-center">
               <Rocket className="h-12 w-12 mx-auto text-muted-foreground mb-4" />

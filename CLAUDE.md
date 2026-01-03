@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Project Showcase Hub** - 오픈소스 프로젝트 포트폴리오 관리 플랫폼
+**Project Showcase Hub** - 개인용 앱 마켓/대시보드 플랫폼
 
-팀과 개인이 프로젝트를 타임라인, 갤러리, 칸반 보드 등 다양한 뷰로 관리하고 공유할 수 있는 웹 애플리케이션.
+자신이 개발하거나 사용하는 앱들을 한 곳에서 관리하고 빠르게 접근할 수 있는 웹 애플리케이션.
 
 ## Development Commands
 
@@ -34,7 +34,8 @@ npx shadcn@latest add [component-name]
 | Styling | Tailwind CSS v4 |
 | Components | shadcn/ui (new-york style) |
 | Database | Supabase (PostgreSQL) |
-| Auth | Supabase Auth (GitHub, Google OAuth) |
+| Auth | 환경변수 비밀번호 (ADMIN_PASSWORD) |
+| GitHub | 공개 API (/users/{username}/repos) |
 | Deploy | Vercel |
 
 ## Architecture
@@ -43,27 +44,38 @@ npx shadcn@latest add [component-name]
 
 ```
 src/app/
-├── (auth)/              # 인증 라우트 그룹 (login, signup)
-├── (dashboard)/         # 보호된 대시보드 라우트 (projects)
+├── (auth)/              # 인증 라우트 그룹 (login)
+├── (dashboard)/         # 대시보드 라우트 (projects)
 ├── api/                 # API Routes
+│   ├── auth/            # 인증 API (login, logout, session)
 │   ├── projects/        # 프로젝트 CRUD
 │   ├── comments/        # 댓글 관리
-│   └── github/repos/    # GitHub 레포지토리 조회
-└── auth/callback/       # OAuth 콜백 처리
+│   └── github/          # GitHub 레포 조회/동기화
+└── proxy.ts             # 라우트 보호 (Next.js 16 Proxy)
 ```
 
 ### 라우트 보호
 
 `src/proxy.ts`에서 라우트 보호 처리 (Next.js 16 Proxy):
 - **Admin 라우트**: `/projects/new`, `/projects/[id]/edit` - Admin만 접근 가능
-- **인증 라우트**: `/login`, `/signup` - 인증 시 `/projects`로 리다이렉트
+- **인증 라우트**: `/login` - 인증 시 `/projects`로 리다이렉트
 
-### 인증 시스템
+### 인증 시스템 (v2.2 단순화)
 
 `src/contexts/auth-context.tsx`에서 전역 인증 상태 관리:
-- Email/Password, GitHub OAuth, Google OAuth 지원
-- GitHub 계정 연동 (기존 사용자가 GitHub 추가 연결)
+- 환경변수 비밀번호 (ADMIN_PASSWORD) 기반 인증
+- 단일 Admin 사용자
 - `useAuth()` 훅으로 인증 상태 접근
+
+```typescript
+type AuthContextType = {
+  isAuthenticated: boolean
+  isAdmin: boolean
+  loading: boolean
+  signIn: (password: string) => Promise<{ error: string | null }>
+  signOut: () => Promise<void>
+}
+```
 
 ### Supabase 클라이언트
 
@@ -71,15 +83,17 @@ src/app/
 |------|------|
 | `src/lib/supabase/client.ts` | 클라이언트 사이드 (브라우저) |
 | `src/lib/supabase/server.ts` | 서버 사이드 (RSC, API Routes) |
+| `src/lib/auth/session.ts` | 세션 토큰 생성/검증 |
 
 ### 데이터베이스 스키마
 
 ```
 profiles (id, email, display_name, avatar_url)
     ↓
-projects (id, title, description, owner_id, thumbnail_url)
+projects (id, title, description, owner_id, thumbnail_url, github_repo)
     ↓
-├── ratings (id, project_id, user_id, score 1-5) - 사용자당 1개
+├── project_metadata (github_stars, github_forks, tech_stack 등)
+├── ratings (id, project_id, user_id, score 1-5)
 └── comments (id, project_id, user_id, content)
 ```
 
@@ -95,17 +109,18 @@ projects (id, title, description, owner_id, thumbnail_url)
 | `useRating()` | 별점 조회/등록 |
 | `useComments()` | 댓글 CRUD |
 | `useGithubRepos()` | GitHub 레포지토리 목록 |
+| `useRepoScanner()` | GitHub 전체 스캔 |
 
 ### Feature 컴포넌트 구조
 
 ```
 src/components/features/
-├── auth/        # 로그인/회원가입 폼, OAuth 버튼
+├── auth/        # 로그인 폼
 ├── projects/    # 프로젝트 카드, 목록, 폼
 ├── views/       # 갤러리, 보드, 타임라인, 리스트 뷰
 ├── rating/      # 별점 컴포넌트
 ├── comments/    # 댓글 섹션
-└── github/      # GitHub 레포 카드, 연동 섹션
+└── github/      # GitHub 레포 카드, 동기화 섹션
 ```
 
 ## Key Conventions
@@ -122,15 +137,17 @@ cp .env.example .env.local
 ```
 
 필수:
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `NEXT_PUBLIC_SITE_URL` (OAuth 리다이렉트용)
+- `NEXT_PUBLIC_SUPABASE_URL` - Supabase 프로젝트 URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase 익명 키
+- `ADMIN_PASSWORD` - 관리자 로그인 비밀번호
+- `GITHUB_USERNAME` - GitHub 사용자명 (공개 API용, 기본값: garimto81)
 
-### OAuth 설정 (Supabase Dashboard에서 설정)
+선택:
+- `NEXT_PUBLIC_SITE_URL` - 사이트 URL (기본값: http://localhost:3000)
 
-GitHub/Google 로그인은 **Supabase Dashboard**에서 설정:
-1. Authentication → Providers → GitHub/Google 활성화
-2. Client ID, Client Secret 입력
-3. Callback URL: `https://<project>.supabase.co/auth/v1/callback`
+### GitHub API 설정
 
-참고: `supabase/config.toml`은 로컬 개발용 설정
+OAuth 없이 공개 API 사용:
+- 레포 목록: `GET /users/{GITHUB_USERNAME}/repos`
+- 레포 정보: `GET /repos/{owner}/{repo}`
+- 레이트 제한: 시간당 60회 (5분 캐싱으로 대응)

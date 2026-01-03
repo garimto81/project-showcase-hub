@@ -40,11 +40,11 @@ export async function PATCH(request: Request, context: RouteContext) {
   const supabase = await createClient()
 
   // 인증 확인
-  const authResult = await requireAuth(supabase)
+  const authResult = await requireAuth()
   if (authResult.error) return authResult.error
 
   // 소유자 확인
-  const ownershipResult = await requireOwnership(supabase, 'projects', projectId, authResult.user.id)
+  const ownershipResult = await requireOwnership('projects', projectId)
   if (ownershipResult.error) return ownershipResult.error
 
   // JSON 파싱

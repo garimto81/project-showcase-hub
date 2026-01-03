@@ -1,13 +1,21 @@
 import { NextResponse } from 'next/server'
-import { SupabaseClient, User } from '@supabase/supabase-js'
-import { Database } from '@/types/database'
+import { getSession } from '@/lib/auth/session'
+import { createClient } from '@/lib/supabase/server'
 
 type ApiError = {
   error: string
 }
 
+// Admin 사용자 정보 (고정)
+const ADMIN_USER = {
+  id: 'admin',
+  email: 'admin@local',
+}
+
+type AdminUser = typeof ADMIN_USER
+
 type AuthResult = {
-  user: User
+  user: AdminUser
   error?: never
 } | {
   user?: never
@@ -23,15 +31,13 @@ type OwnershipResult = {
 }
 
 /**
- * 인증된 사용자 확인
+ * 인증된 사용자 확인 (세션 기반)
  * @returns 인증된 사용자 또는 401 에러 응답
  */
-export async function requireAuth(
-  supabase: SupabaseClient<Database>
-): Promise<AuthResult> {
-  const { data: { user } } = await supabase.auth.getUser()
+export async function requireAuth(): Promise<AuthResult> {
+  const session = await getSession()
 
-  if (!user) {
+  if (!session.isAuthenticated) {
     return {
       error: NextResponse.json(
         { error: '로그인이 필요합니다' },
@@ -40,28 +46,31 @@ export async function requireAuth(
     }
   }
 
-  return { user }
+  return { user: ADMIN_USER }
 }
 
 /**
  * 리소스 소유권 확인
- * @param supabase - Supabase 클라이언트
+ * 단일 사용자 시스템이므로 인증만 확인하고 소유권은 항상 성공
  * @param table - 테이블명
  * @param resourceId - 리소스 ID
- * @param userId - 확인할 사용자 ID
- * @param ownerField - 소유자 필드명 (기본값: 'owner_id')
  * @returns 성공 또는 403/404 에러 응답
  */
 export async function requireOwnership(
-  supabase: SupabaseClient<Database>,
   table: 'projects' | 'comments',
-  resourceId: string,
-  userId: string,
-  ownerField: string = table === 'projects' ? 'owner_id' : 'user_id'
+  resourceId: string
 ): Promise<OwnershipResult> {
+  // 먼저 인증 확인
+  const authResult = await requireAuth()
+  if (authResult.error) {
+    return { error: authResult.error }
+  }
+
+  // 리소스 존재 확인
+  const supabase = await createClient()
   const { data: resource } = await supabase
     .from(table)
-    .select(ownerField)
+    .select('id')
     .eq('id', resourceId)
     .single()
 
@@ -75,16 +84,7 @@ export async function requireOwnership(
     }
   }
 
-  const ownerId = resource[ownerField as keyof typeof resource] as string
-  if (ownerId !== userId) {
-    return {
-      error: NextResponse.json(
-        { error: '권한이 없습니다' },
-        { status: 403 }
-      ),
-    }
-  }
-
+  // 단일 사용자이므로 인증되면 소유권 있음
   return { success: true }
 }
 

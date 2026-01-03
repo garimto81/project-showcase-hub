@@ -11,7 +11,7 @@ interface ProjectRatingProps {
 }
 
 export function ProjectRating({ projectId }: ProjectRatingProps) {
-  const { user, loading: authLoading } = useAuth()
+  const { isAuthenticated, loading: authLoading } = useAuth()
   const { average, total, distribution, userRating, loading, submitRating } = useRating(projectId)
 
   if (loading) {
@@ -34,11 +34,11 @@ export function ProjectRating({ projectId }: ProjectRatingProps) {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base">
-              {user ? '내 평가' : '로그인하여 평가하기'}
+              {isAuthenticated ? '내 평가' : '로그인하여 평가하기'}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {user ? (
+            {isAuthenticated ? (
               <div className="flex items-center gap-4">
                 <StarRating
                   value={userRating ?? 0}

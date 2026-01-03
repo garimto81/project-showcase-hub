@@ -1,156 +1,73 @@
 "use client"
 
 import { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react'
-import type { User, Session, SupabaseClient, AuthError } from '@supabase/supabase-js'
-import type { Database } from '@/types/database'
-
-type AuthResult = { error: AuthError | null }
 
 type AuthContextType = {
-  user: User | null
-  session: Session | null
-  loading: boolean
+  isAuthenticated: boolean
   isAdmin: boolean
-  signIn: (email: string, password: string) => Promise<AuthResult>
-  signUp: (email: string, password: string, displayName?: string) => Promise<AuthResult>
-  signInWithOAuth: (provider: 'github' | 'google', next?: string) => Promise<void>
+  loading: boolean
+  signIn: (password: string) => Promise<{ error: string | null }>
   signOut: () => Promise<void>
-  linkGitHubAccount: (next?: string) => Promise<void>
-  hasGitHubLinked: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-// 환경 변수 확인
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-const isSupabaseConfigured = !!(supabaseUrl && supabaseAnonKey)
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [session, setSession] = useState<Session | null>(null)
-  const [loading, setLoading] = useState(isSupabaseConfigured)
-  const [supabase, setSupabase] = useState<SupabaseClient<Database> | null>(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [loading, setLoading] = useState(true)
 
-  // 클라이언트 측에서만 Supabase 초기화
+  // 초기 세션 확인
   useEffect(() => {
-    if (!isSupabaseConfigured) {
-      setLoading(false)
-      return
-    }
-
-    // 동적으로 클라이언트 생성
-    import('@/lib/supabase/client').then(({ createClient }) => {
-      const client = createClient()
-      setSupabase(client)
-    })
+    checkSession()
   }, [])
 
-  useEffect(() => {
-    if (!supabase) return
-
-    // 초기 세션 가져오기
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
+  const checkSession = async () => {
+    try {
+      const response = await fetch('/api/auth/session')
+      const data = await response.json()
+      setIsAuthenticated(data.isAuthenticated)
+    } catch {
+      setIsAuthenticated(false)
+    } finally {
       setLoading(false)
-    })
-
-    // 인증 상태 변경 구독
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-    })
-
-    return () => subscription.unsubscribe()
-  }, [supabase])
-
-  const signIn = useCallback(async (email: string, password: string): Promise<AuthResult> => {
-    if (!supabase) {
-      return { error: { message: 'Supabase가 초기화되지 않았습니다', name: 'AuthError' } as AuthError }
     }
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    return { error }
-  }, [supabase])
+  }
 
-  const signUp = useCallback(async (email: string, password: string, displayName?: string): Promise<AuthResult> => {
-    if (!supabase) {
-      return { error: { message: 'Supabase가 초기화되지 않았습니다', name: 'AuthError' } as AuthError }
+  const signIn = useCallback(async (password: string): Promise<{ error: string | null }> => {
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        return { error: data.error || '로그인에 실패했습니다' }
+      }
+
+      setIsAuthenticated(true)
+      return { error: null }
+    } catch {
+      return { error: '로그인 처리 중 오류가 발생했습니다' }
     }
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { display_name: displayName || email }
-      }
-    })
-    return { error }
-  }, [supabase])
-
-  const signInWithOAuth = useCallback(async (provider: 'github' | 'google', next?: string): Promise<void> => {
-    if (!supabase) return
-
-    const callbackUrl = typeof window !== 'undefined'
-      ? `${window.location.origin}/auth/callback${next ? `?next=${encodeURIComponent(next)}` : ''}`
-      : undefined
-
-    // GitHub 로그인 시 레포지토리 접근 권한 요청
-    const scopes = provider === 'github' ? 'read:user repo' : undefined
-
-    await supabase.auth.signInWithOAuth({
-      provider,
-      options: {
-        redirectTo: callbackUrl,
-        scopes,
-      }
-    })
-  }, [supabase])
+  }, [])
 
   const signOut = useCallback(async () => {
-    if (supabase) {
-      await supabase.auth.signOut()
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' })
+    } finally {
+      setIsAuthenticated(false)
     }
-  }, [supabase])
+  }, [])
 
-  const linkGitHubAccount = useCallback(async (next?: string): Promise<void> => {
-    if (!supabase) return
-
-    const callbackUrl = typeof window !== 'undefined'
-      ? `${window.location.origin}/auth/callback${next ? `?next=${encodeURIComponent(next)}` : ''}`
-      : undefined
-
-    await supabase.auth.linkIdentity({
-      provider: 'github',
-      options: {
-        redirectTo: callbackUrl,
-        scopes: 'read:user repo',
-      }
-    })
-  }, [supabase])
-
-  // GitHub 계정이 연동되어 있는지 확인
-  const hasGitHubLinked = useMemo(() => {
-    if (!user) return false
-    // provider가 github이거나, identities에 github가 포함되어 있으면 연동됨
-    if (user.app_metadata?.provider === 'github') return true
-    const identities = user.identities || []
-    return identities.some(identity => identity.provider === 'github')
-  }, [user])
-
-  // Admin 권한 확인 (환경변수로 설정된 사용자 ID와 일치하면 Admin)
-  const isAdmin = useMemo(() => {
-    if (!user) return false
-    const adminUserId = process.env.NEXT_PUBLIC_ADMIN_USER_ID
-    // ADMIN_USER_ID가 설정되지 않으면 모든 로그인 사용자를 Admin으로 취급 (개발 편의)
-    if (!adminUserId) return true
-    return user.id === adminUserId
-  }, [user])
+  // 단일 사용자이므로 인증 = Admin
+  const isAdmin = isAuthenticated
 
   const value = useMemo(
-    () => ({ user, session, loading, isAdmin, signIn, signUp, signInWithOAuth, signOut, linkGitHubAccount, hasGitHubLinked }),
-    [user, session, loading, isAdmin, signIn, signUp, signInWithOAuth, signOut, linkGitHubAccount, hasGitHubLinked]
+    () => ({ isAuthenticated, isAdmin, loading, signIn, signOut }),
+    [isAuthenticated, isAdmin, loading, signIn, signOut]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

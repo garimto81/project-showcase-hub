@@ -10,8 +10,7 @@ import { FileText, Github } from 'lucide-react'
 
 export default function NewProjectPage() {
   const { createProject } = useProjects()
-  const { hasGitHubLinked } = useAuth()
-  const [activeTab, setActiveTab] = useState<string>(hasGitHubLinked ? 'github' : 'manual')
+  const [activeTab, setActiveTab] = useState<string>('github')
 
   return (
     <div className="container py-8">

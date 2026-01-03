@@ -23,10 +23,11 @@ interface CommentItemProps {
 }
 
 export function CommentItem({ comment, onUpdate, onDelete }: CommentItemProps) {
-  const { user } = useAuth()
+  const { isAuthenticated } = useAuth()
   const [isEditing, setIsEditing] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
-  const isOwner = user?.id === comment.user_id
+  // TODO: 사용자 ID 비교 로직 재구성 필요
+  const isOwner = false
 
   const handleUpdate = async (content: string) => {
     await onUpdate(comment.id, content)
