@@ -8,7 +8,7 @@ const adminPatterns = [/^\/projects\/[^/]+\/edit$/]
 // 인증 라우트 (로그인 상태면 /projects로 리다이렉트)
 const authRoutes = ['/login', '/signup']
 
-export async function middleware(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
   const response = NextResponse.next({
     request: {
       headers: request.headers,

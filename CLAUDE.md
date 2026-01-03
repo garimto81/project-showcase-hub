@@ -54,8 +54,8 @@ src/app/
 
 ### 라우트 보호
 
-`src/middleware.ts`에서 라우트 보호 처리:
-- **보호된 라우트**: `/projects/*` - 미인증 시 `/login`으로 리다이렉트
+`src/proxy.ts`에서 라우트 보호 처리 (Next.js 16 Proxy):
+- **Admin 라우트**: `/projects/new`, `/projects/[id]/edit` - Admin만 접근 가능
 - **인증 라우트**: `/login`, `/signup` - 인증 시 `/projects`로 리다이렉트
 
 ### 인증 시스템
