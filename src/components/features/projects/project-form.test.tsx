@@ -38,6 +38,7 @@ describe('ProjectForm', () => {
       expect(screen.getByLabelText(/프로젝트 제목/i)).toBeInTheDocument()
       expect(screen.getByLabelText(/설명/i)).toBeInTheDocument()
       expect(screen.getByLabelText(/썸네일 URL/i)).toBeInTheDocument()
+      expect(screen.getByLabelText(/배포 앱 URL/i)).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /프로젝트 생성/i })).toBeInTheDocument()
     })
 
@@ -65,6 +66,7 @@ describe('ProjectForm', () => {
           title: '새 프로젝트',
           description: undefined,
           thumbnail_url: undefined,
+          url: undefined,
         })
       })
     })
@@ -78,6 +80,7 @@ describe('ProjectForm', () => {
       await user.type(screen.getByLabelText(/프로젝트 제목/i), '멋진 프로젝트')
       await user.type(screen.getByLabelText(/설명/i), '이것은 멋진 프로젝트입니다')
       await user.type(screen.getByLabelText(/썸네일 URL/i), 'https://example.com/image.jpg')
+      await user.type(screen.getByLabelText(/배포 앱 URL/i), 'https://my-app.vercel.app')
       await user.click(screen.getByRole('button', { name: /프로젝트 생성/i }))
 
       await waitFor(() => {
@@ -85,6 +88,7 @@ describe('ProjectForm', () => {
           title: '멋진 프로젝트',
           description: '이것은 멋진 프로젝트입니다',
           thumbnail_url: 'https://example.com/image.jpg',
+          url: 'https://my-app.vercel.app',
         })
       })
     })
@@ -110,6 +114,7 @@ describe('ProjectForm', () => {
       title: '기존 프로젝트',
       description: '기존 설명',
       thumbnail_url: 'https://example.com/old.jpg',
+      url: 'https://my-app.vercel.app',
     }
 
     it('수정 모드 폼을 렌더링한다', () => {
@@ -130,6 +135,7 @@ describe('ProjectForm', () => {
       expect(screen.getByLabelText(/프로젝트 제목/i)).toHaveValue('기존 프로젝트')
       expect(screen.getByLabelText(/설명/i)).toHaveValue('기존 설명')
       expect(screen.getByLabelText(/썸네일 URL/i)).toHaveValue('https://example.com/old.jpg')
+      expect(screen.getByLabelText(/배포 앱 URL/i)).toHaveValue('https://my-app.vercel.app')
     })
 
     it('수정된 데이터로 제출한다', async () => {
@@ -149,6 +155,7 @@ describe('ProjectForm', () => {
           title: '수정된 프로젝트',
           description: '기존 설명',
           thumbnail_url: 'https://example.com/old.jpg',
+          url: 'https://my-app.vercel.app',
         })
       })
     })
@@ -171,6 +178,7 @@ describe('ProjectForm', () => {
       expect(screen.getByLabelText(/프로젝트 제목/i)).toBeDisabled()
       expect(screen.getByLabelText(/설명/i)).toBeDisabled()
       expect(screen.getByLabelText(/썸네일 URL/i)).toBeDisabled()
+      expect(screen.getByLabelText(/배포 앱 URL/i)).toBeDisabled()
 
       resolveSubmit!()
 
