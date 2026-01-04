@@ -61,8 +61,10 @@ export function GitHubReposSection() {
         try {
           await createProject({
             title: repo.name,
-            description: repo.description || `GitHub: ${repo.html_url}`,
+            description: repo.description || undefined,
             thumbnail_url: `https://opengraph.githubassets.com/1/${repo.full_name}`,
+            github_repo: repo.full_name,
+            url: repo.homepage || undefined,
           })
           successCount++
         } catch (err) {

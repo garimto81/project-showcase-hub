@@ -74,10 +74,16 @@ export async function POST(request: Request) {
   if (authResult.error) return authResult.error
 
   // JSON 파싱
-  const bodyResult = await parseJsonBody<{ title?: string; description?: string; thumbnail_url?: string }>(request)
+  const bodyResult = await parseJsonBody<{
+    title?: string
+    description?: string
+    thumbnail_url?: string
+    url?: string
+    github_repo?: string
+  }>(request)
   if (bodyResult.error) return bodyResult.error
 
-  const { title, description, thumbnail_url } = bodyResult.data
+  const { title, description, thumbnail_url, url, github_repo } = bodyResult.data
 
   if (!title?.trim()) {
     return apiError.badRequest('프로젝트 제목은 필수입니다')
@@ -89,6 +95,8 @@ export async function POST(request: Request) {
       title: title.trim(),
       description: description?.trim() || null,
       thumbnail_url: thumbnail_url || null,
+      url: url?.trim() || null,
+      github_repo: github_repo?.trim() || null,
       owner_id: null, // 단일 사용자 시스템이므로 null
     })
     .select()
