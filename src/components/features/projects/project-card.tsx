@@ -10,7 +10,6 @@ import {
   CardContent,
 } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
 import { Star, ExternalLink, StarOff } from 'lucide-react'
 import type { ProjectWithProfile, ProjectMetadata } from '@/types/database'
 import { TechStackTags } from './tech-stack-tags'
@@ -35,12 +34,10 @@ export function ProjectCard({
   const ownerName = project.profiles?.display_name || '익명'
   const ownerInitial = ownerName.charAt(0).toUpperCase()
 
-  const handleLaunchApp = (e: React.MouseEvent) => {
-    e.preventDefault()
+  const handleLaunchApp = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.stopPropagation()
-    if (project.url) {
-      window.open(project.url, '_blank', 'noopener,noreferrer')
-    }
+    // Link 컴포넌트의 기본 동작을 막기 위해 이벤트 전파 중단
+    // a 태그의 기본 동작(href로 이동)은 유지
   }
 
   const handleToggleFavorite = (e: React.MouseEvent) => {
@@ -130,17 +127,18 @@ export function ProjectCard({
             <span>{ownerName}</span>
           </div>
 
-          {/* 앱 열기 버튼 */}
+          {/* 앱 열기 버튼 - Link 내부에서 외부 링크 처리를 위해 a 태그 사용 */}
           {project.url && (
-            <Button
+            <a
+              href={project.url}
+              target="_blank"
+              rel="noopener noreferrer"
               onClick={handleLaunchApp}
-              variant="default"
-              size="sm"
-              className="w-full"
+              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-8 px-3 w-full"
             >
-              <ExternalLink className="h-4 w-4 mr-2" />
+              <ExternalLink className="h-4 w-4" />
               앱 열기
-            </Button>
+            </a>
           )}
         </CardContent>
       </Card>
