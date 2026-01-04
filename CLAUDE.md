@@ -87,22 +87,45 @@ Next.js 16에서는 `src/proxy.ts`가 제거되어 라우트 보호를 사용하
 - `/projects/new`, `/projects/[id]/edit`: 컴포넌트 내부에서 `isAdmin` 체크
 - `/login`: `AuthContext`에서 인증 시 리다이렉트 처리
 
-### 인증 시스템 (v2.2 단순화)
+### 인증 시스템 (v2.4 다중 인증)
 
-`src/contexts/auth-context.tsx`에서 전역 인증 상태 관리:
-- 환경변수 비밀번호 (ADMIN_PASSWORD) 기반 인증
-- 단일 Admin 사용자
-- `useAuth()` 훅으로 인증 상태 접근
+`src/contexts/auth-context.tsx`에서 전역 인증 상태 관리.
+**3가지 인증 방식 지원**:
+
+| 방식 | 인증 방법 | UUID | 권한 |
+|------|-----------|------|------|
+| **Admin** | 환경변수 비밀번호 (ADMIN_PASSWORD) | `...0001` (고정) | 앱 CRUD |
+| **User** | Supabase Auth (회원가입/로그인) | Supabase 생성 | 댓글/별점 |
+| **Anonymous** | 인증 없음 | `...0002` (고정) | 댓글/별점 |
 
 ```typescript
 type AuthContextType = {
-  isAuthenticated: boolean
+  isAuthenticated: boolean  // Admin 또는 User
   isAdmin: boolean
+  user: AuthUser | null
   loading: boolean
-  signIn: (password: string) => Promise<{ error: string | null }>
+  signIn: (password: string) => Promise<...>                        // Admin 로그인
+  signInWithEmail: (email, password) => Promise<...>                // User 로그인
+  signUp: (email, password, displayName) => Promise<...>            // User 회원가입
   signOut: () => Promise<void>
 }
+
+type AuthUser = {
+  id: string
+  email: string
+  role: 'admin' | 'user' | 'anonymous'
+}
 ```
+
+**인증 흐름**:
+1. `checkSession()`: Admin 세션 → Supabase Auth 순서로 확인
+2. `signUp()`: Supabase Auth 회원가입 → profiles 테이블 자동 생성
+3. `signOut()`: role에 따라 Admin/User 로그아웃 처리
+
+**API 인증 유틸리티** (`src/lib/api/utils.ts`):
+- `getAuthUser()`: 선택적 인증 (Admin → User → Anonymous)
+- `requireAuth()`: Admin/User 전용 (익명 차단)
+- `requireAdmin()`: Admin 전용
 
 ### Supabase 클라이언트
 
