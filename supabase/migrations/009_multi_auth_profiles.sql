@@ -3,6 +3,9 @@
 -- PRD-0003 v2.4.0
 -- =============================================================
 
+-- 외래 키 제약 조건 임시 비활성화 (고정 UUID 삽입용)
+ALTER TABLE profiles DROP CONSTRAINT IF EXISTS profiles_id_fkey;
+
 -- 1. Admin 프로필 생성 (앱 관리용)
 -- UUID: 00000000-0000-0000-0000-000000000001
 INSERT INTO profiles (id, email, display_name, avatar_url)
@@ -24,6 +27,13 @@ VALUES (
   NULL
 )
 ON CONFLICT (id) DO NOTHING;
+
+-- 외래 키 제약 조건 재생성 (NOT VALID로 기존 데이터 제외)
+ALTER TABLE profiles
+  ADD CONSTRAINT profiles_id_fkey
+  FOREIGN KEY (id) REFERENCES auth.users(id)
+  ON DELETE CASCADE
+  NOT VALID;
 
 -- 3. 기존 잘못된 user_id 데이터 정리
 -- 'admin' 문자열로 저장된 잘못된 데이터를 Anonymous UUID로 변경
@@ -64,3 +74,7 @@ WHERE owner_id IS NOT NULL
 --    - 인증 없음
 --    - 댓글/별점 작성 권한
 --    - 수정/삭제 불가
+--
+-- 외래 키 제약 조건은 NOT VALID로 설정되어 있어
+-- Admin/Anonymous UUID는 auth.users에 없어도 허용됩니다.
+-- 새로 생성되는 User는 정상적으로 외래 키 검증이 수행됩니다.
