@@ -10,12 +10,39 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Commands
 
+### Basic Commands
+
 ```bash
 npm run dev          # Development server (localhost:3000)
 npm run build        # Production build
+npm run start        # Start production server
 npm run lint         # ESLint
 npx tsc --noEmit     # Type check
 ```
+
+### Testing Commands
+
+```bash
+# Unit Tests (Vitest)
+npm run test              # Watch mode
+npm run test:run          # Single run
+npm run test:coverage     # Coverage report
+
+# E2E Tests (Playwright)
+npm run test:e2e          # 공개 페이지 테스트 (chromium)
+npm run test:e2e:ui       # UI mode
+npm run test:e2e:auth     # 인증 필요 테스트 (setup + authenticated)
+
+# 개별 테스트
+npx playwright test tests/e2e/projects.spec.ts  # 특정 파일
+npx playwright test --project=setup             # 인증 설정만
+npx playwright test --project=authenticated     # 인증된 테스트만
+```
+
+**Playwright 프로젝트 구조:**
+- `chromium`: 공개 페이지 테스트 (기본 실행)
+- `setup`: 인증 설정 (`.auth/user.json` 생성)
+- `authenticated`: 인증 필요 테스트 (setup 의존)
 
 ### shadcn/ui Components
 
@@ -46,19 +73,19 @@ npx shadcn@latest add [component-name]
 src/app/
 ├── (auth)/              # 인증 라우트 그룹 (login)
 ├── (dashboard)/         # 대시보드 라우트 (projects)
-├── api/                 # API Routes
-│   ├── auth/            # 인증 API (login, logout, session)
-│   ├── projects/        # 프로젝트 CRUD
-│   ├── comments/        # 댓글 관리
-│   └── github/          # GitHub 레포 조회/동기화
-└── proxy.ts             # 라우트 보호 (Next.js 16 Proxy)
+└── api/                 # API Routes
+    ├── auth/            # 인증 API (login, logout, session)
+    ├── projects/        # 프로젝트 CRUD
+    ├── comments/        # 댓글 관리
+    └── github/          # GitHub 레포 조회/동기화
 ```
 
 ### 라우트 보호
 
-`src/proxy.ts`에서 라우트 보호 처리 (Next.js 16 Proxy):
-- **Admin 라우트**: `/projects/new`, `/projects/[id]/edit` - Admin만 접근 가능
-- **인증 라우트**: `/login` - 인증 시 `/projects`로 리다이렉트
+Next.js 16에서는 `src/proxy.ts`가 제거되어 라우트 보호를 사용하지 않습니다:
+- 모든 라우트는 클라이언트 사이드에서 `useAuth()` 훅으로 접근 제어
+- `/projects/new`, `/projects/[id]/edit`: 컴포넌트 내부에서 `isAdmin` 체크
+- `/login`: `AuthContext`에서 인증 시 리다이렉트 처리
 
 ### 인증 시스템 (v2.2 단순화)
 
@@ -102,14 +129,15 @@ projects (id, title, description, owner_id, thumbnail_url, github_repo)
 
 ### 주요 커스텀 훅
 
-| 훅 | 용도 |
-|----|------|
-| `useAuth()` | 인증 상태 및 메서드 |
-| `useProjects()` | 프로젝트 목록 조회 |
-| `useRating()` | 별점 조회/등록 |
-| `useComments()` | 댓글 CRUD |
-| `useGithubRepos()` | GitHub 레포지토리 목록 |
-| `useRepoScanner()` | GitHub 전체 스캔 |
+| 훅 | 용도 | 위치 |
+|----|------|------|
+| `useAuth()` | 인증 상태 및 메서드 | `src/hooks/use-auth.ts` |
+| `useProjects()` | 프로젝트 목록 조회 | `src/hooks/use-projects.ts` |
+| `useRating()` | 별점 조회/등록 | `src/hooks/use-rating.ts` |
+| `useComments()` | 댓글 CRUD | `src/hooks/use-comments.ts` |
+| `useGithubRepos()` | GitHub 레포지토리 목록 | `src/hooks/use-github-repos.ts` |
+| `useRepoScanner()` | GitHub 전체 스캔 | `src/hooks/use-repo-scanner.ts` |
+| `useProjectMetadata()` | 프로젝트 메타데이터 관리 | `src/hooks/use-project-metadata.ts` |
 
 ### Feature 컴포넌트 구조
 
@@ -151,3 +179,48 @@ OAuth 없이 공개 API 사용:
 - 레포 목록: `GET /users/{GITHUB_USERNAME}/repos`
 - 레포 정보: `GET /repos/{owner}/{repo}`
 - 레이트 제한: 시간당 60회 (5분 캐싱으로 대응)
+
+## Key Libraries and Utilities
+
+### Core Libraries
+
+| 라이브러리 | 용도 |
+|-----------|------|
+| `@supabase/ssr` | SSR 환경 Supabase 클라이언트 |
+| `@supabase/supabase-js` | Supabase JavaScript 클라이언트 |
+| `date-fns` | 날짜 포맷팅 및 조작 |
+| `sonner` | Toast 알림 |
+| `next-themes` | 다크 모드 테마 전환 |
+
+### Utilities
+
+| 유틸리티 | 용도 | 위치 |
+|---------|------|------|
+| `cn()` | Tailwind CSS 클래스 병합 | `src/lib/utils.ts` |
+| `createClient()` | 클라이언트 사이드 Supabase | `src/lib/supabase/client.ts` |
+| `createServerClient()` | 서버 사이드 Supabase | `src/lib/supabase/server.ts` |
+| `generateToken()` / `verifyToken()` | 세션 토큰 관리 | `src/lib/auth/session.ts` |
+| `detectDeploymentUrl()` | GitHub 레포 배포 URL 감지 | `src/lib/deployment-detector.ts` |
+| `scanUserRepos()` | GitHub 레포 전체 스캔 | `src/lib/repo-scanner.ts` |
+| `handleApiError()` | API 에러 처리 | `src/lib/api/utils.ts` |
+
+## Testing Guidelines
+
+### Unit Tests (Vitest)
+
+- 테스트 파일: `*.test.ts` 또는 `*.spec.ts`
+- 위치: 테스트할 파일과 동일한 디렉토리
+- Setup: `src/test/setup.tsx`
+- 커버리지 제외: `src/components/ui/**` (shadcn/ui)
+
+### E2E Tests (Playwright)
+
+- 테스트 파일: `tests/e2e/*.spec.ts`
+- Base URL: `https://project-showcase-hub-phi.vercel.app` (production)
+- 인증 상태: `tests/e2e/.auth/user.json`
+- 스크린샷: 실패 시에만 자동 저장
+
+**주의사항:**
+- E2E 테스트는 기본적으로 production 환경 대상
+- 로컬 테스트: `BASE_URL=http://localhost:3000 npm run test:e2e`
+- 인증 필요 테스트는 별도 프로젝트로 실행 (`test:e2e:auth`)

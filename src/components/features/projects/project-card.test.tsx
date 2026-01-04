@@ -57,8 +57,11 @@ describe('ProjectCard', () => {
   it('links to project detail page', () => {
     render(<ProjectCard project={mockProject} />)
 
-    const link = screen.getByRole('link')
-    expect(link).toHaveAttribute('href', '/projects/project-1')
+    // Link 컴포넌트가 제거되고 Card onClick으로 네비게이션 처리
+    // Card는 div이므로 role="link"가 없음
+    const card = screen.getByText('테스트 프로젝트').closest('[data-slot="card"]')
+    expect(card).toBeInTheDocument()
+    expect(card).toHaveClass('cursor-pointer')
   })
 
   it('renders average rating when provided', () => {

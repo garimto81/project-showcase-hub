@@ -26,14 +26,6 @@ vi.mock('next/image', () => ({
   default: function MockImage({
     src,
     alt,
-    fill: _fill,
-    unoptimized: _unoptimized,
-    priority: _priority,
-    quality: _quality,
-    placeholder: _placeholder,
-    blurDataURL: _blurDataURL,
-    loader: _loader,
-    sizes: _sizes,
     ...props
   }: {
     src: string

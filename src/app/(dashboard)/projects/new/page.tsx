@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useProjects } from '@/hooks/use-projects'
-import { useAuth } from '@/hooks/use-auth'
 import { ProjectForm } from '@/components/features/projects'
 import { GitHubReposSection } from '@/components/features/github/github-repos-section'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'

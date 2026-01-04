@@ -23,7 +23,7 @@ interface CommentItemProps {
 }
 
 export function CommentItem({ comment, onUpdate, onDelete }: CommentItemProps) {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated: _isAuthenticated } = useAuth()
   const [isEditing, setIsEditing] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   // TODO: 사용자 ID 비교 로직 재구성 필요

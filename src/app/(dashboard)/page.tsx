@@ -1,14 +1,14 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef, startTransition } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { useAuth } from '@/hooks/use-auth'
 import { useProjects } from '@/hooks/use-projects'
 import { useRepoScanner } from '@/hooks/use-repo-scanner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Plus, Search, RefreshCw, Github, Rocket } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Plus, Search, RefreshCw, Rocket } from 'lucide-react'
 import Link from 'next/link'
 import {
   ViewModeSwitcher,
@@ -56,7 +56,7 @@ export default function DashboardPage() {
   })
 
   const scanner = useRepoScanner()
-  const autoScanTriggeredRef = useRef(false)
+  const _autoScanTriggeredRef = useRef(false) // Reserved for future auto-scan feature
 
   const handleScan = useCallback(async () => {
     const result = await scanner.startScan()

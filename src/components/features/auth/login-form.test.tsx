@@ -22,35 +22,22 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(),
 }))
 
-// OAuthButtons mock
-vi.mock('./oauth-buttons', () => ({
-  OAuthButtons: () => <div data-testid="oauth-buttons">OAuth Buttons</div>,
-}))
-
 describe('LoginForm', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  it('renders login form with email and password fields', () => {
+  it('renders login form with password field', () => {
     render(<LoginForm />)
 
-    expect(screen.getByLabelText(/이메일/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/비밀번호/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /로그인/i })).toBeInTheDocument()
   })
 
-  it('shows OAuth buttons', () => {
+  it('shows admin login title', () => {
     render(<LoginForm />)
 
-    expect(screen.getByTestId('oauth-buttons')).toBeInTheDocument()
-  })
-
-  it('shows signup link', () => {
-    render(<LoginForm />)
-
-    const signupLink = screen.getByRole('link', { name: /회원가입/i })
-    expect(signupLink).toHaveAttribute('href', '/signup')
+    expect(screen.getByText(/관리자 로그인/i)).toBeInTheDocument()
   })
 
   it('handles successful login', async () => {
@@ -59,12 +46,11 @@ describe('LoginForm', () => {
 
     render(<LoginForm />)
 
-    await user.type(screen.getByLabelText(/이메일/i), 'test@example.com')
-    await user.type(screen.getByLabelText(/비밀번호/i), 'password123')
+    await user.type(screen.getByLabelText(/비밀번호/i), 'admin123')
     await user.click(screen.getByRole('button', { name: /로그인/i }))
 
     await waitFor(() => {
-      expect(mockSignIn).toHaveBeenCalledWith('test@example.com', 'password123')
+      expect(mockSignIn).toHaveBeenCalledWith('admin123')
       expect(mockPush).toHaveBeenCalledWith('/projects')
       expect(mockRefresh).toHaveBeenCalled()
     })
@@ -72,18 +58,17 @@ describe('LoginForm', () => {
 
   it('shows error message on login failure', async () => {
     mockSignIn.mockResolvedValueOnce({
-      error: { message: '잘못된 이메일 또는 비밀번호입니다' },
+      error: '잘못된 비밀번호입니다',
     })
     const user = userEvent.setup()
 
     render(<LoginForm />)
 
-    await user.type(screen.getByLabelText(/이메일/i), 'test@example.com')
     await user.type(screen.getByLabelText(/비밀번호/i), 'wrongpassword')
     await user.click(screen.getByRole('button', { name: /로그인/i }))
 
     await waitFor(() => {
-      expect(screen.getByText(/잘못된 이메일 또는 비밀번호입니다/i)).toBeInTheDocument()
+      expect(screen.getByText(/잘못된 비밀번호입니다/i)).toBeInTheDocument()
     })
   })
 
@@ -97,13 +82,11 @@ describe('LoginForm', () => {
 
     render(<LoginForm />)
 
-    await user.type(screen.getByLabelText(/이메일/i), 'test@example.com')
-    await user.type(screen.getByLabelText(/비밀번호/i), 'password123')
+    await user.type(screen.getByLabelText(/비밀번호/i), 'admin123')
     await user.click(screen.getByRole('button', { name: /로그인/i }))
 
     // 제출 중 상태 확인
     expect(screen.getByRole('button', { name: /로그인 중/i })).toBeDisabled()
-    expect(screen.getByLabelText(/이메일/i)).toBeDisabled()
     expect(screen.getByLabelText(/비밀번호/i)).toBeDisabled()
 
     // Promise 해결
@@ -114,23 +97,11 @@ describe('LoginForm', () => {
     })
   })
 
-  it('does not submit form with empty email', async () => {
-    const user = userEvent.setup()
-
-    render(<LoginForm />)
-
-    await user.type(screen.getByLabelText(/비밀번호/i), 'password123')
-    await user.click(screen.getByRole('button', { name: /로그인/i }))
-
-    expect(mockSignIn).not.toHaveBeenCalled()
-  })
-
   it('does not submit form with empty password', async () => {
     const user = userEvent.setup()
 
     render(<LoginForm />)
 
-    await user.type(screen.getByLabelText(/이메일/i), 'test@example.com')
     await user.click(screen.getByRole('button', { name: /로그인/i }))
 
     expect(mockSignIn).not.toHaveBeenCalled()

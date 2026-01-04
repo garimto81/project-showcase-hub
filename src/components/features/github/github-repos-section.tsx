@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Github, RefreshCw, Link2, Plus, Loader2 } from 'lucide-react'
+import { Github, RefreshCw, Plus, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useGitHubRepos } from '@/hooks/use-github-repos'

@@ -9,6 +9,12 @@ vi.mock('@/hooks/use-auth', () => ({
   useAuth: () => mockUseAuth(),
 }))
 
+// AuthContext mock for provider
+vi.mock('@/contexts/auth-context', () => ({
+  AuthProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  useAuth: () => mockUseAuth(),
+}))
+
 // useComments mock
 const mockUseComments = vi.fn()
 vi.mock('@/hooks/use-comments', () => ({
@@ -61,7 +67,7 @@ describe('CommentsSection', () => {
 
   describe('로딩 상태', () => {
     it('로딩 중 스켈레톤을 표시한다', () => {
-      mockUseAuth.mockReturnValue({ user: null, loading: false })
+      mockUseAuth.mockReturnValue({ isAuthenticated: false, loading: false })
       mockUseComments.mockReturnValue({
         comments: [],
         loading: true,
@@ -77,7 +83,7 @@ describe('CommentsSection', () => {
     })
 
     it('로딩 중에는 댓글 목록을 표시하지 않는다', () => {
-      mockUseAuth.mockReturnValue({ user: null, loading: false })
+      mockUseAuth.mockReturnValue({ isAuthenticated: false, loading: false })
       mockUseComments.mockReturnValue({
         comments: mockComments,
         loading: true,
@@ -94,7 +100,7 @@ describe('CommentsSection', () => {
 
   describe('로그인 상태에 따른 폼 표시', () => {
     it('로그인한 사용자에게 댓글 작성 폼을 표시한다', () => {
-      mockUseAuth.mockReturnValue({ user: { id: 'user-1' }, loading: false })
+      mockUseAuth.mockReturnValue({ isAuthenticated: true, loading: false })
       mockUseComments.mockReturnValue({
         comments: [],
         loading: false,
@@ -109,7 +115,7 @@ describe('CommentsSection', () => {
     })
 
     it('로그인하지 않은 사용자에게 로그인 안내 메시지를 표시한다', () => {
-      mockUseAuth.mockReturnValue({ user: null, loading: false })
+      mockUseAuth.mockReturnValue({ isAuthenticated: false, loading: false })
       mockUseComments.mockReturnValue({
         comments: [],
         loading: false,
@@ -125,7 +131,7 @@ describe('CommentsSection', () => {
     })
 
     it('인증 로딩 중에는 폼 영역을 표시하지 않는다', () => {
-      mockUseAuth.mockReturnValue({ user: null, loading: true })
+      mockUseAuth.mockReturnValue({ isAuthenticated: false, loading: true })
       mockUseComments.mockReturnValue({
         comments: [],
         loading: false,
@@ -143,7 +149,7 @@ describe('CommentsSection', () => {
 
   describe('댓글 목록', () => {
     it('댓글 목록을 표시한다', () => {
-      mockUseAuth.mockReturnValue({ user: { id: 'user-1' }, loading: false })
+      mockUseAuth.mockReturnValue({ isAuthenticated: true, loading: false })
       mockUseComments.mockReturnValue({
         comments: mockComments,
         loading: false,
@@ -159,7 +165,7 @@ describe('CommentsSection', () => {
     })
 
     it('각 댓글의 내용을 표시한다', () => {
-      mockUseAuth.mockReturnValue({ user: { id: 'user-1' }, loading: false })
+      mockUseAuth.mockReturnValue({ isAuthenticated: true, loading: false })
       mockUseComments.mockReturnValue({
         comments: mockComments,
         loading: false,
@@ -175,7 +181,7 @@ describe('CommentsSection', () => {
     })
 
     it('댓글 개수를 표시한다', () => {
-      mockUseAuth.mockReturnValue({ user: { id: 'user-1' }, loading: false })
+      mockUseAuth.mockReturnValue({ isAuthenticated: true, loading: false })
       mockUseComments.mockReturnValue({
         comments: mockComments,
         loading: false,
@@ -192,7 +198,7 @@ describe('CommentsSection', () => {
 
   describe('빈 댓글 상태', () => {
     it('댓글이 없을 때 안내 메시지를 표시한다', () => {
-      mockUseAuth.mockReturnValue({ user: { id: 'user-1' }, loading: false })
+      mockUseAuth.mockReturnValue({ isAuthenticated: true, loading: false })
       mockUseComments.mockReturnValue({
         comments: [],
         loading: false,
@@ -208,7 +214,7 @@ describe('CommentsSection', () => {
     })
 
     it('댓글이 없어도 로그인한 사용자에게 폼을 표시한다', () => {
-      mockUseAuth.mockReturnValue({ user: { id: 'user-1' }, loading: false })
+      mockUseAuth.mockReturnValue({ isAuthenticated: true, loading: false })
       mockUseComments.mockReturnValue({
         comments: [],
         loading: false,
@@ -225,7 +231,7 @@ describe('CommentsSection', () => {
 
   describe('댓글 폼 placeholder', () => {
     it('댓글 작성 폼에 placeholder가 표시된다', () => {
-      mockUseAuth.mockReturnValue({ user: { id: 'user-1' }, loading: false })
+      mockUseAuth.mockReturnValue({ isAuthenticated: true, loading: false })
       mockUseComments.mockReturnValue({
         comments: [],
         loading: false,
