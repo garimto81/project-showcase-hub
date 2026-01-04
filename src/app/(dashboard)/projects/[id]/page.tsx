@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getSession } from '@/lib/auth/session'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -47,10 +48,10 @@ async function getProject(id: string) {
   return data
 }
 
-async function getCurrentUser() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  return user
+async function checkIsAdmin() {
+  const session = await getSession()
+  // 단일 Admin 시스템이므로 인증 = Admin
+  return session.isAuthenticated
 }
 
 export default async function ProjectPage({
@@ -59,20 +60,17 @@ export default async function ProjectPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const [project, currentUser] = await Promise.all([
+  const [project, isAdmin] = await Promise.all([
     getProject(id),
-    getCurrentUser(),
+    checkIsAdmin(),
   ])
 
   if (!project) {
     notFound()
   }
 
-  const ownerName = project.profiles?.display_name || '익명'
+  const ownerName = project.profiles?.display_name || 'Admin'
   const ownerInitial = ownerName.charAt(0).toUpperCase()
-  // Admin 권한 체크: 환경변수 미설정 시 모든 로그인 사용자가 Admin
-  const adminUserId = process.env.NEXT_PUBLIC_ADMIN_USER_ID
-  const isAdmin = currentUser ? (!adminUserId || currentUser.id === adminUserId) : false
   const createdAt = new Date(project.created_at).toLocaleDateString('ko-KR')
 
   // 메타데이터 (배열로 반환될 수 있으므로 첫 번째 요소 사용)
