@@ -89,7 +89,7 @@ export async function POST(request: Request) {
       title: title.trim(),
       description: description?.trim() || null,
       thumbnail_url: thumbnail_url || null,
-      owner_id: authResult.user.id,
+      owner_id: null, // 단일 사용자 시스템이므로 null
     })
     .select()
     .single()

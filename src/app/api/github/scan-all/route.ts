@@ -1,67 +1,78 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { RepoScanner } from '@/lib/repo-scanner'
+import { getSession } from '@/lib/auth/session'
 import type { DetectedApp } from '@/types/database'
+
+const GITHUB_USERNAME = process.env.GITHUB_USERNAME || 'garimto81'
+
+interface GitHubRepoResponse {
+  name: string
+  full_name: string
+  description: string | null
+  html_url: string
+  homepage: string | null
+  stargazers_count: number
+  language: string | null
+}
 
 /**
  * POST /api/github/scan-all
- * 사용자의 모든 GitHub 레포를 스캔하여 배포된 앱을 찾습니다.
+ * GitHub 공개 API를 사용하여 레포를 스캔하고 배포된 앱을 찾습니다.
  */
 export async function POST() {
   try {
     const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
 
-    if (!user) {
+    // 세션 기반 인증 확인
+    const session = await getSession()
+    if (!session.isAuthenticated) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // GitHub access token 가져오기
-    const { data: identities } = await supabase.auth.getUserIdentities()
-    const githubIdentity = identities?.identities?.find(
-      (identity) => identity.provider === 'github'
+    // 공개 API로 레포 목록 가져오기
+    const response = await fetch(
+      `https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=updated&per_page=100`,
+      {
+        headers: {
+          Accept: 'application/vnd.github.v3+json',
+          'User-Agent': 'Project-Showcase-Hub',
+        },
+        next: { revalidate: 300 }, // 5분 캐싱
+      }
     )
 
-    if (!githubIdentity?.identity_data) {
+    if (!response.ok) {
       return NextResponse.json(
-        { error: 'GitHub 계정이 연동되지 않았습니다', needsGithubLink: true },
-        { status: 400 }
+        { error: `GitHub API 오류: ${response.status}` },
+        { status: response.status }
       )
     }
 
-    // Supabase에서 GitHub access token 가져오기
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
-    const accessToken = session?.provider_token
+    const repos: GitHubRepoResponse[] = await response.json()
 
-    if (!accessToken) {
-      return NextResponse.json(
-        {
-          error: 'GitHub access token을 가져올 수 없습니다. 다시 로그인해주세요.',
-          needsReauth: true,
-        },
-        { status: 401 }
-      )
-    }
-
-    // 레포 스캔 시작
-    const scanner = new RepoScanner(accessToken)
-    const scanResult = await scanner.scanAllRepos()
+    // 배포된 앱 탐지 (homepage가 있는 레포)
+    const detectedApps: DetectedApp[] = repos
+      .filter((repo) => repo.homepage && repo.homepage.trim() !== '')
+      .map((repo) => ({
+        repoFullName: repo.full_name,
+        repoName: repo.name,
+        description: repo.description,
+        url: repo.homepage!,
+        source: 'github_homepage' as const,
+        confidence: 'high' as const,
+        thumbnailUrl: null,
+      }))
 
     // 탐지된 앱을 DB에 저장 (기존 앱은 건너뛰기)
     const savedApps: DetectedApp[] = []
     const existingApps: string[] = []
 
-    for (const app of scanResult.detectedApps) {
+    for (const app of detectedApps) {
       // 이미 등록된 앱인지 확인 (github_repo로 체크)
       const { data: existing } = await supabase
         .from('projects')
         .select('id')
         .eq('github_repo', app.repoFullName)
-        .eq('owner_id', user.id)
         .single()
 
       if (existing) {
@@ -73,7 +84,7 @@ export async function POST() {
       const { error } = await supabase.from('projects').insert({
         title: app.repoName,
         description: app.description,
-        owner_id: user.id,
+        owner_id: null, // 단일 사용자 시스템이므로 null
         thumbnail_url: app.thumbnailUrl,
         url: app.url,
         app_type: 'web_app',
@@ -83,19 +94,21 @@ export async function POST() {
 
       if (!error) {
         savedApps.push(app)
+      } else {
+        console.error(`프로젝트 생성 실패 (${app.repoName}):`, error)
       }
     }
 
     return NextResponse.json({
       success: true,
       result: {
-        totalRepos: scanResult.totalRepos,
-        scannedRepos: scanResult.scannedRepos,
-        detectedApps: scanResult.detectedApps.length,
+        totalRepos: repos.length,
+        scannedRepos: repos.length,
+        detectedApps: detectedApps.length,
         savedApps: savedApps.length,
         existingApps: existingApps.length,
-        skippedRepos: scanResult.skippedRepos.length,
-        errors: scanResult.errors.length,
+        skippedRepos: repos.length - detectedApps.length,
+        errors: 0,
       },
       apps: savedApps,
       skipped: existingApps,

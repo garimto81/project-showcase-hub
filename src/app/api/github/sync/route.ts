@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { getSession } from '@/lib/auth/session'
 import type { ProjectStatus } from '@/types/database'
 
 interface GitHubRepoResponse {
@@ -29,13 +30,9 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
 
-    // 인증 확인
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-
-    if (authError || !user) {
+    // 세션 기반 인증 확인
+    const session = await getSession()
+    if (!session.isAuthenticated) {
       return NextResponse.json({ error: '인증이 필요합니다' }, { status: 401 })
     }
 
@@ -46,19 +43,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'projectId가 필요합니다' }, { status: 400 })
     }
 
-    // 프로젝트 조회 (소유자 확인)
+    // 프로젝트 조회 (단일 사용자이므로 소유권 체크 불필요)
     const { data: project, error: projectError } = await supabase
       .from('projects')
-      .select('id, github_repo, owner_id')
+      .select('id, github_repo')
       .eq('id', projectId)
       .single()
 
     if (projectError || !project) {
       return NextResponse.json({ error: '프로젝트를 찾을 수 없습니다' }, { status: 404 })
-    }
-
-    if (project.owner_id !== user.id) {
-      return NextResponse.json({ error: '권한이 없습니다' }, { status: 403 })
     }
 
     if (!project.github_repo) {
