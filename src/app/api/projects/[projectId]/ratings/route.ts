@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import {
+  getAuthUser,
   requireAuth,
   parseJsonBody,
   apiError,
@@ -44,13 +45,16 @@ export async function GET(
   })
 }
 
-// POST: 별점 생성 (익명 사용자 지원, upsert 제거)
+// POST: 별점 생성 (익명 사용자 지원)
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ projectId: string }> }
 ) {
   const { projectId } = await params
   const supabase = await createClient()
+
+  // 현재 사용자 정보 가져오기 (익명 허용)
+  const user = await getAuthUser()
 
   // JSON 파싱
   const bodyResult = await parseJsonBody<{ score?: number }>(request)
@@ -61,13 +65,41 @@ export async function POST(
     return apiError.badRequest('1-5 사이의 점수를 입력해주세요')
   }
 
-  // 익명 사용자로 별점 등록 (user_id = null)
-  // 주의: 익명 사용자는 중복 별점 가능 (나중에 IP 기반 제한 추가 가능)
+  // 사용자 ID 설정 (익명이면 Anonymous UUID)
+  const userId = user.role === 'anonymous' ? user.id : user.id
+
+  // 기존 별점 확인 (로그인 사용자만)
+  if (user.role !== 'anonymous') {
+    const { data: existing } = await supabase
+      .from('ratings')
+      .select('id')
+      .eq('project_id', projectId)
+      .eq('user_id', userId)
+      .single()
+
+    if (existing) {
+      // 기존 별점 업데이트
+      const { data, error } = await supabase
+        .from('ratings')
+        .update({ score })
+        .eq('id', existing.id)
+        .select()
+        .single()
+
+      if (error) {
+        return apiError.serverError(error.message)
+      }
+
+      return apiSuccess.ok(data)
+    }
+  }
+
+  // 새 별점 생성
   const { data, error } = await supabase
     .from('ratings')
     .insert({
       project_id: projectId,
-      user_id: null,
+      user_id: userId,
       score,
     })
     .select()

@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import {
-  requireAuth,
+  requireAdmin,
   requireOwnership,
   parseJsonBody,
   apiError,
@@ -51,17 +51,17 @@ export async function GET(request: Request, context: RouteContext) {
   return apiSuccess.ok(data)
 }
 
-// PATCH: 프로젝트 수정
+// PATCH: 프로젝트 수정 (Admin 전용)
 export async function PATCH(request: Request, context: RouteContext) {
   const { projectId } = await context.params
   const supabase = await createClient()
 
-  // 인증 확인
-  const authResult = await requireAuth()
+  // Admin 인증 확인
+  const authResult = await requireAdmin()
   if (authResult.error) return authResult.error
 
   // 소유자 확인
-  const ownershipResult = await requireOwnership('projects', projectId)
+  const ownershipResult = await requireOwnership('projects', projectId, authResult.user.id)
   if (ownershipResult.error) return ownershipResult.error
 
   // JSON 파싱
@@ -97,17 +97,17 @@ export async function PATCH(request: Request, context: RouteContext) {
   return apiSuccess.ok(data)
 }
 
-// DELETE: 프로젝트 삭제
+// DELETE: 프로젝트 삭제 (Admin 전용)
 export async function DELETE(request: Request, context: RouteContext) {
   const { projectId } = await context.params
   const supabase = await createClient()
 
-  // 인증 확인
-  const authResult = await requireAuth()
+  // Admin 인증 확인
+  const authResult = await requireAdmin()
   if (authResult.error) return authResult.error
 
   // 소유자 확인
-  const ownershipResult = await requireOwnership('projects', projectId)
+  const ownershipResult = await requireOwnership('projects', projectId, authResult.user.id)
   if (ownershipResult.error) return ownershipResult.error
 
   const { error } = await supabase

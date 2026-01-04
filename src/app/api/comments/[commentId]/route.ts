@@ -30,7 +30,7 @@ export async function PATCH(
   }
 
   // 본인 댓글인지 확인
-  const ownershipResult = await requireOwnership('comments', commentId)
+  const ownershipResult = await requireOwnership('comments', commentId, authResult.user.id)
   if (ownershipResult.error) return ownershipResult.error
 
   const { data, error } = await supabase
@@ -63,7 +63,7 @@ export async function DELETE(
   if (authResult.error) return authResult.error
 
   // 본인 댓글인지 확인
-  const ownershipResult = await requireOwnership('comments', commentId)
+  const ownershipResult = await requireOwnership('comments', commentId, authResult.user.id)
   if (ownershipResult.error) return ownershipResult.error
 
   const { error } = await supabase

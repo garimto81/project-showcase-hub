@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import {
-  requireAuth,
+  requireAdmin,
   parseJsonBody,
   apiError,
   apiSuccess,
@@ -65,12 +65,12 @@ export async function GET(request: Request) {
   })
 }
 
-// POST: 새 프로젝트 생성
+// POST: 새 프로젝트 생성 (Admin 전용)
 export async function POST(request: Request) {
   const supabase = await createClient()
 
-  // 인증 확인
-  const authResult = await requireAuth()
+  // Admin 인증 확인
+  const authResult = await requireAdmin()
   if (authResult.error) return authResult.error
 
   // JSON 파싱
@@ -97,7 +97,7 @@ export async function POST(request: Request) {
       thumbnail_url: thumbnail_url || null,
       url: url?.trim() || null,
       github_repo: github_repo?.trim() || null,
-      owner_id: null, // 단일 사용자 시스템이므로 null
+      owner_id: authResult.user.id, // Admin UUID
     })
     .select()
     .single()

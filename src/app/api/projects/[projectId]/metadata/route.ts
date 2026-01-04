@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import {
-  requireAuth,
+  requireAdmin,
   requireOwnership,
   parseJsonBody,
   apiError,
@@ -39,12 +39,12 @@ export async function PATCH(request: Request, context: RouteContext) {
   const { projectId } = await context.params
   const supabase = await createClient()
 
-  // 인증 확인
-  const authResult = await requireAuth()
+  // Admin 인증 확인
+  const authResult = await requireAdmin()
   if (authResult.error) return authResult.error
 
   // 소유자 확인
-  const ownershipResult = await requireOwnership('projects', projectId)
+  const ownershipResult = await requireOwnership('projects', projectId, authResult.user.id)
   if (ownershipResult.error) return ownershipResult.error
 
   // JSON 파싱

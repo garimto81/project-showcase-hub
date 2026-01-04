@@ -6,16 +6,34 @@ type ApiError = {
   error: string
 }
 
+// 고정 UUID
+const ADMIN_UUID = '00000000-0000-0000-0000-000000000001'
+const ANONYMOUS_UUID = '00000000-0000-0000-0000-000000000002'
+
 // Admin 사용자 정보 (고정)
 const ADMIN_USER = {
-  id: 'admin',
+  id: ADMIN_UUID,
   email: 'admin@local',
+  role: 'admin' as const,
 }
 
-type AdminUser = typeof ADMIN_USER
+// Anonymous 사용자 정보 (고정)
+const ANONYMOUS_USER = {
+  id: ANONYMOUS_UUID,
+  email: 'anonymous@local',
+  role: 'anonymous' as const,
+}
+
+export type UserRole = 'admin' | 'user' | 'anonymous'
+
+export type AuthUser = {
+  id: string
+  email: string
+  role: UserRole
+}
 
 type AuthResult = {
-  user: AdminUser
+  user: AuthUser
   error?: never
 } | {
   user?: never
@@ -31,13 +49,41 @@ type OwnershipResult = {
 }
 
 /**
- * 인증된 사용자 확인 (세션 기반)
+ * 현재 사용자 정보 가져오기 (선택적 인증)
+ * 인증되지 않은 경우 Anonymous 사용자 반환
+ * @returns Admin, User, 또는 Anonymous
+ */
+export async function getAuthUser(): Promise<AuthUser> {
+  // 1. 세션 토큰 확인 (Admin)
+  const session = await getSession()
+  if (session.isAuthenticated) {
+    return ADMIN_USER
+  }
+
+  // 2. Supabase Auth 확인 (User)
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) {
+    return {
+      id: user.id,
+      email: user.email || '',
+      role: 'user' as const,
+    }
+  }
+
+  // 3. 인증 없음 → Anonymous
+  return ANONYMOUS_USER
+}
+
+/**
+ * 인증된 사용자 확인 (Admin 또는 User만)
+ * Anonymous는 거부
  * @returns 인증된 사용자 또는 401 에러 응답
  */
 export async function requireAuth(): Promise<AuthResult> {
-  const session = await getSession()
+  const user = await getAuthUser()
 
-  if (!session.isAuthenticated) {
+  if (user.role === 'anonymous') {
     return {
       error: NextResponse.json(
         { error: '로그인이 필요합니다' },
@@ -46,36 +92,63 @@ export async function requireAuth(): Promise<AuthResult> {
     }
   }
 
-  return { user: ADMIN_USER }
+  return { user }
+}
+
+/**
+ * Admin 전용 인증 확인
+ * User와 Anonymous는 거부
+ * @returns Admin 사용자 또는 403 에러 응답
+ */
+export async function requireAdmin(): Promise<AuthResult> {
+  const user = await getAuthUser()
+
+  if (user.role !== 'admin') {
+    return {
+      error: NextResponse.json(
+        { error: '관리자 권한이 필요합니다' },
+        { status: 403 }
+      ),
+    }
+  }
+
+  return { user }
 }
 
 /**
  * 리소스 소유권 확인
- * 단일 사용자 시스템이므로 인증만 확인하고 소유권은 항상 성공
  * @param table - 테이블명
  * @param resourceId - 리소스 ID
+ * @param userId - 사용자 ID (현재 사용자)
  * @returns 성공 또는 403/404 에러 응답
  */
 export async function requireOwnership(
-  table: 'projects' | 'comments',
-  resourceId: string
+  table: 'projects' | 'comments' | 'ratings',
+  resourceId: string,
+  userId: string
 ): Promise<OwnershipResult> {
-  // 먼저 인증 확인
-  const authResult = await requireAuth()
-  if (authResult.error) {
-    return { error: authResult.error }
-  }
-
-  // 리소스 존재 확인
+  // 리소스 존재 및 소유권 확인
   const supabase = await createClient()
-  const { data: resource } = await supabase
+
+  let query = supabase
     .from(table)
-    .select('id')
+    .select('id, user_id')
     .eq('id', resourceId)
     .single()
 
+  // projects 테이블은 owner_id 사용
+  if (table === 'projects') {
+    query = supabase
+      .from(table)
+      .select('id, owner_id')
+      .eq('id', resourceId)
+      .single()
+  }
+
+  const { data: resource } = await query
+
   if (!resource) {
-    const resourceName = table === 'projects' ? '프로젝트' : '댓글'
+    const resourceName = table === 'projects' ? '프로젝트' : table === 'comments' ? '댓글' : '별점'
     return {
       error: NextResponse.json(
         { error: `${resourceName}를 찾을 수 없습니다` },
@@ -84,7 +157,20 @@ export async function requireOwnership(
     }
   }
 
-  // 단일 사용자이므로 인증되면 소유권 있음
+  // 소유권 확인
+  const ownerId = table === 'projects'
+    ? (resource as { owner_id?: string }).owner_id
+    : (resource as { user_id?: string }).user_id
+
+  if (ownerId !== userId) {
+    return {
+      error: NextResponse.json(
+        { error: '권한이 없습니다' },
+        { status: 403 }
+      ),
+    }
+  }
+
   return { success: true }
 }
 
