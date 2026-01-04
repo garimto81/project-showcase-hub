@@ -5,12 +5,14 @@ import { LoginForm } from './login-form'
 
 // Auth context mock
 const mockSignIn = vi.fn()
+const mockSignInWithEmail = vi.fn()
 const mockPush = vi.fn()
 const mockRefresh = vi.fn()
 
 vi.mock('@/hooks/use-auth', () => ({
   useAuth: () => ({
     signIn: mockSignIn,
+    signInWithEmail: mockSignInWithEmail,
   }),
 }))
 
@@ -34,10 +36,11 @@ describe('LoginForm', () => {
     expect(screen.getByRole('button', { name: /로그인/i })).toBeInTheDocument()
   })
 
-  it('shows admin login title', () => {
+  it('shows Admin and User tabs', () => {
     render(<LoginForm />)
 
-    expect(screen.getByText(/관리자 로그인/i)).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: /Admin/i })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: /User/i })).toBeInTheDocument()
   })
 
   it('handles successful login', async () => {
