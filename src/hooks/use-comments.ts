@@ -30,12 +30,12 @@ export function useComments(projectId: string) {
     fetchComments()
   }, [fetchComments])
 
-  const addComment = async (content: string) => {
+  const addComment = async (content: string, authorName: string) => {
     try {
       const response = await fetch(`/api/projects/${projectId}/comments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content }),
+        body: JSON.stringify({ content, author_name: authorName }),
       })
 
       if (!response.ok) {

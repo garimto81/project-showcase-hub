@@ -28,7 +28,7 @@ export async function GET(
   return apiSuccess.ok(data || [])
 }
 
-// POST: 댓글 생성
+// POST: 댓글 생성 (익명 사용자 지원)
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ projectId: string }> }
@@ -36,27 +36,30 @@ export async function POST(
   const { projectId } = await params
   const supabase = await createClient()
 
-  // 인증 확인
-  const authResult = await requireAuth()
-  if (authResult.error) return authResult.error
-
   // JSON 파싱
-  const bodyResult = await parseJsonBody<{ content?: string }>(request)
+  const bodyResult = await parseJsonBody<{ content?: string; author_name?: string }>(request)
   if (bodyResult.error) return bodyResult.error
 
-  const { content } = bodyResult.data
+  const { content, author_name } = bodyResult.data
   if (!content?.trim()) {
     return apiError.badRequest('댓글 내용을 입력해주세요')
   }
 
+  // 익명 사용자: author_name 필수
+  if (!author_name?.trim()) {
+    return apiError.badRequest('작성자 이름을 입력해주세요')
+  }
+
+  // 모든 사용자 익명으로 처리 (user_id = null)
   const { data, error } = await supabase
     .from('comments')
     .insert({
       project_id: projectId,
-      user_id: authResult.user.id,
+      user_id: null,
       content: content.trim(),
+      author_name: author_name.trim(),
     })
-    .select('*, profiles(display_name, avatar_url)')
+    .select('*')
     .single()
 
   if (error) {

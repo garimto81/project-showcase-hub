@@ -124,7 +124,7 @@ export type Database = {
         Row: {
           id: string
           project_id: string
-          user_id: string
+          user_id: string | null // nullable - 익명 사용자 지원
           score: number
           created_at: string
           updated_at: string
@@ -132,7 +132,7 @@ export type Database = {
         Insert: {
           id?: string
           project_id: string
-          user_id: string
+          user_id?: string | null // nullable - 익명 사용자 지원
           score: number
           created_at?: string
           updated_at?: string
@@ -160,16 +160,18 @@ export type Database = {
         Row: {
           id: string
           project_id: string
-          user_id: string
+          user_id: string | null // nullable - 익명 사용자 지원
           content: string
+          author_name: string | null // 익명 작성자 이름
           created_at: string
           updated_at: string
         }
         Insert: {
           id?: string
           project_id: string
-          user_id: string
+          user_id?: string | null // nullable - 익명 사용자 지원
           content: string
+          author_name?: string | null // 익명 작성자 이름
           created_at?: string
           updated_at?: string
         }

@@ -46,6 +46,7 @@ describe('CommentsSection', () => {
       project_id: 'project-1',
       user_id: 'user-1',
       content: '첫 번째 댓글입니다',
+      author_name: null,
       created_at: '2025-01-01T00:00:00Z',
       updated_at: '2025-01-01T00:00:00Z',
       profiles: { display_name: 'User 1', avatar_url: null },
@@ -55,6 +56,7 @@ describe('CommentsSection', () => {
       project_id: 'project-1',
       user_id: 'user-2',
       content: '두 번째 댓글입니다',
+      author_name: null,
       created_at: '2025-01-01T01:00:00Z',
       updated_at: '2025-01-01T01:00:00Z',
       profiles: { display_name: 'User 2', avatar_url: 'https://example.com/avatar.jpg' },
@@ -98,9 +100,8 @@ describe('CommentsSection', () => {
     })
   })
 
-  describe('로그인 상태에 따른 폼 표시', () => {
-    it('로그인한 사용자에게 댓글 작성 폼을 표시한다', () => {
-      mockUseAuth.mockReturnValue({ isAuthenticated: true, loading: false })
+  describe('익명 댓글 작성', () => {
+    it('로그인 없이도 댓글 작성 폼을 표시한다', () => {
       mockUseComments.mockReturnValue({
         comments: [],
         loading: false,
@@ -114,8 +115,7 @@ describe('CommentsSection', () => {
       expect(screen.getByTestId('comment-form')).toBeInTheDocument()
     })
 
-    it('로그인하지 않은 사용자에게 로그인 안내 메시지를 표시한다', () => {
-      mockUseAuth.mockReturnValue({ isAuthenticated: false, loading: false })
+    it('익명 댓글 안내 메시지를 표시한다', () => {
       mockUseComments.mockReturnValue({
         comments: [],
         loading: false,
@@ -126,24 +126,7 @@ describe('CommentsSection', () => {
 
       render(<CommentsSection projectId="project-1" />)
 
-      expect(screen.getByText(/댓글을 작성하려면 로그인이 필요합니다/i)).toBeInTheDocument()
-      expect(screen.queryByTestId('comment-form')).not.toBeInTheDocument()
-    })
-
-    it('인증 로딩 중에는 폼 영역을 표시하지 않는다', () => {
-      mockUseAuth.mockReturnValue({ isAuthenticated: false, loading: true })
-      mockUseComments.mockReturnValue({
-        comments: [],
-        loading: false,
-        addComment: vi.fn(),
-        updateComment: vi.fn(),
-        deleteComment: vi.fn(),
-      })
-
-      render(<CommentsSection projectId="project-1" />)
-
-      expect(screen.queryByTestId('comment-form')).not.toBeInTheDocument()
-      expect(screen.queryByText(/로그인이 필요합니다/i)).not.toBeInTheDocument()
+      expect(screen.getByText(/로그인 없이 누구나 댓글을 남길 수 있습니다/i)).toBeInTheDocument()
     })
   })
 

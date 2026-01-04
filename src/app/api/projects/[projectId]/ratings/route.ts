@@ -44,17 +44,13 @@ export async function GET(
   })
 }
 
-// POST: 별점 생성/수정 (upsert)
+// POST: 별점 생성 (익명 사용자 지원, upsert 제거)
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ projectId: string }> }
 ) {
   const { projectId } = await params
   const supabase = await createClient()
-
-  // 인증 확인
-  const authResult = await requireAuth()
-  if (authResult.error) return authResult.error
 
   // JSON 파싱
   const bodyResult = await parseJsonBody<{ score?: number }>(request)
@@ -65,17 +61,15 @@ export async function POST(
     return apiError.badRequest('1-5 사이의 점수를 입력해주세요')
   }
 
+  // 익명 사용자로 별점 등록 (user_id = null)
+  // 주의: 익명 사용자는 중복 별점 가능 (나중에 IP 기반 제한 추가 가능)
   const { data, error } = await supabase
     .from('ratings')
-    .upsert(
-      {
-        project_id: projectId,
-        user_id: authResult.user.id,
-        score,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'project_id,user_id' }
-    )
+    .insert({
+      project_id: projectId,
+      user_id: null,
+      score,
+    })
     .select()
     .single()
 
@@ -83,7 +77,7 @@ export async function POST(
     return apiError.serverError(error.message)
   }
 
-  return apiSuccess.ok(data)
+  return apiSuccess.created(data)
 }
 
 // DELETE: 별점 삭제

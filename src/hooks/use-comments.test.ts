@@ -128,14 +128,14 @@ describe('useComments', () => {
       })
 
       await act(async () => {
-        await result.current.addComment('새 댓글')
+        await result.current.addComment('새 댓글', '홍길동')
       })
 
       expect(mockFetch).toHaveBeenCalledWith(
         '/api/projects/project-1/comments',
         expect.objectContaining({
           method: 'POST',
-          body: JSON.stringify({ content: '새 댓글' }),
+          body: JSON.stringify({ content: '새 댓글', author_name: '홍길동' }),
         })
       )
     })
@@ -159,7 +159,7 @@ describe('useComments', () => {
 
       await expect(
         act(async () => {
-          await result.current.addComment('새 댓글')
+          await result.current.addComment('새 댓글', '홍길동')
         })
       ).rejects.toThrow('로그인이 필요합니다')
     })

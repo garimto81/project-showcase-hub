@@ -26,9 +26,14 @@ export function CommentItem({ comment, onUpdate, onDelete }: CommentItemProps) {
   const { isAdmin } = useAuth()
   const [isEditing, setIsEditing] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
-  const isOwner = isAdmin
 
-  const handleUpdate = async (content: string) => {
+  // 익명 댓글 여부 확인
+  const isAnonymous = !comment.user_id
+  // 익명 댓글은 수정/삭제 불가, Admin만 삭제 가능
+  const canEdit = !isAnonymous && isAdmin
+  const canDelete = isAdmin
+
+  const handleUpdate = async (content: string, _authorName: string) => {
     await onUpdate(comment.id, content)
     setIsEditing(false)
   }
@@ -43,8 +48,11 @@ export function CommentItem({ comment, onUpdate, onDelete }: CommentItemProps) {
     }
   }
 
-  const displayName = comment.profiles?.display_name || '익명'
-  const avatarUrl = comment.profiles?.avatar_url
+  // 익명 댓글: author_name 사용, 로그인 댓글: profiles 사용
+  const displayName = isAnonymous
+    ? `${comment.author_name} (게스트)`
+    : (comment.profiles?.display_name || '익명')
+  const avatarUrl = isAnonymous ? null : comment.profiles?.avatar_url
   const isUpdated = comment.updated_at !== comment.created_at
 
   if (isEditing) {
@@ -82,7 +90,7 @@ export function CommentItem({ comment, onUpdate, onDelete }: CommentItemProps) {
             </span>
           </div>
 
-          {isOwner && (
+          {(canEdit || canDelete) && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -96,17 +104,21 @@ export function CommentItem({ comment, onUpdate, onDelete }: CommentItemProps) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setIsEditing(true)}>
-                  <Pencil className="size-4 mr-2" />
-                  수정
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={handleDelete}
-                  className="text-destructive focus:text-destructive"
-                >
-                  <Trash2 className="size-4 mr-2" />
-                  삭제
-                </DropdownMenuItem>
+                {canEdit && (
+                  <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                    <Pencil className="size-4 mr-2" />
+                    수정
+                  </DropdownMenuItem>
+                )}
+                {canDelete && (
+                  <DropdownMenuItem
+                    onClick={handleDelete}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <Trash2 className="size-4 mr-2" />
+                    삭제
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           )}

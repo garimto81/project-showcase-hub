@@ -2,11 +2,11 @@
 
 | 항목 | 값 |
 |------|---|
-| **Version** | 2.2.0 |
+| **Version** | 2.4.0 |
 | **Status** | In Progress |
 | **Priority** | P0 |
 | **Created** | 2025-12-26 |
-| **Updated** | 2026-01-03 |
+| **Updated** | 2026-01-05 |
 | **License** | MIT |
 | **Repository** | `D:\AI\claude01\project-showcase-hub` |
 
@@ -56,26 +56,61 @@
 | **UI** | Tailwind CSS | v4 | 유틸리티 기반 |
 | **Components** | shadcn/ui | latest (new-york) | 접근성, 커스터마이징 |
 | **Database** | Supabase | PostgreSQL | 오픈소스, RLS |
-| **Auth** | 환경변수 인증 | - | ADMIN_PASSWORD 기반 세션 (v2.2) |
+| **Auth** | 환경변수 인증 | - | Admin 전용 (ADMIN_PASSWORD) (v2.4) |
 | **GitHub API** | 공개 API | - | OAuth 불필요, /users/{username}/repos |
 | **Deploy** | Vercel | - | Edge Network |
 
-### 2.1 인증 시스템 단순화 (v2.2)
+### 2.1 인증 시스템 단순화 및 익명 댓글/별점 지원 (v2.4)
 
-**변경 배경**: 개인 전용 앱이므로 다중 사용자 인증 불필요
+**변경 배경**: v2.2에서 환경변수 인증으로 단순화했으나, 별점/댓글 작성 시 UUID 타입 에러 발생 (#31).
+복잡한 이중 인증 시스템 대신, **로그인 없이도 누구나 별점과 댓글을 남길 수 있도록** 변경하여 사용자 경험을 개선.
 
-| 기존 (v2.1) | 변경 (v2.2) |
-|-------------|-------------|
-| Supabase Auth | 환경변수 비밀번호 |
-| Email/Password + OAuth | ADMIN_PASSWORD 단일 인증 |
-| GitHub OAuth 토큰 | 공개 GitHub API |
-| 다중 사용자 지원 | 단일 Admin 사용자 |
+| Role | 인증 방식 | 권한 |
+|------|----------|------|
+| **Guest** (비로그인) | 인증 불필요 | 앱 조회 + **별점/댓글 작성** ✨ |
+| **Admin** | 환경변수 비밀번호 | 앱 CRUD + 설정 관리 |
 
 **환경변수**:
 ```bash
 ADMIN_PASSWORD=your-secure-password
 GITHUB_USERNAME=garimto81
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 ```
+
+**익명 작성 플로우**:
+```typescript
+// 익명 댓글 작성
+POST /api/projects/{id}/comments
+{
+  "content": "댓글 내용",
+  "author_name": "홍길동"  // 익명 작성자 이름 (필수)
+}
+
+// 익명 별점 등록
+POST /api/projects/{id}/ratings
+{
+  "score": 5  // user_id는 자동으로 null 처리
+}
+```
+
+**데이터베이스 변경**:
+```sql
+-- user_id nullable로 변경
+ALTER TABLE comments ALTER COLUMN user_id DROP NOT NULL;
+ALTER TABLE ratings ALTER COLUMN user_id DROP NOT NULL;
+
+-- 익명 작성자 이름 필드 추가
+ALTER TABLE comments ADD COLUMN author_name TEXT;
+```
+
+**주요 변경 사항 (v2.3 → v2.4)**:
+- ✅ 별점/댓글 `user_id` nullable 처리 (익명 사용자 지원)
+- ✅ 댓글 `author_name` 필드 추가 (익명 작성자 이름)
+- ✅ `requireAuth()` 제거 (comments, ratings API)
+- ✅ RLS 정책 업데이트 (익명 작성 허용)
+- ✅ 단일 Admin 인증 유지 (기존 v2.2 방식)
+- ❌ User 로그인/회원가입 제거 (불필요)
 
 ---
 
@@ -90,29 +125,31 @@ GITHUB_USERNAME=garimto81
 
 | Role | 권한 | 인증 필요 |
 |------|------|:--------:|
-| **Guest** (비로그인) | 앱 마켓/대시보드 조회, 앱 목록 탐색 | ❌ |
-| **User** (로그인) | Guest 권한 + 별점/댓글 작성 | ✅ |
-| **Admin** (관리자) | User 권한 + 앱 CRUD, 설정 관리 | ✅ |
+| **Guest** (비로그인) | 앱 조회 + 별점/댓글 작성 (익명) | ❌ |
+| **Admin** (관리자) | 앱 CRUD + 설정 관리 | ✅ |
 
 #### 접근 권한 매트릭스
 
-| 기능 | Guest | User | Admin |
-|------|:-----:|:----:|:-----:|
-| 앱 목록 조회 | ✅ | ✅ | ✅ |
-| 앱 상세 보기 | ✅ | ✅ | ✅ |
-| 앱 실행 (URL 열기) | ✅ | ✅ | ✅ |
-| 별점 보기 | ✅ | ✅ | ✅ |
-| 댓글 보기 | ✅ | ✅ | ✅ |
-| 별점 등록/수정 | ❌ | ✅ | ✅ |
-| 댓글 작성/수정/삭제 | ❌ | ✅ | ✅ |
-| 앱 추가/수정/삭제 | ❌ | ❌ | ✅ |
-| 즐겨찾기 관리 | ❌ | ❌ | ✅ |
-| 설정 관리 | ❌ | ❌ | ✅ |
-| GitHub 레포 스캔 | ❌ | ❌ | ✅ |
+| 기능 | Guest | Admin |
+|------|:-----:|:-----:|
+| 앱 목록 조회 | ✅ | ✅ |
+| 앱 상세 보기 | ✅ | ✅ |
+| 앱 실행 (URL 열기) | ✅ | ✅ |
+| 별점 보기 | ✅ | ✅ |
+| 댓글 보기 | ✅ | ✅ |
+| 별점 등록 (익명) | ✅ | ✅ |
+| 댓글 작성 (익명, author_name 입력) | ✅ | ✅ |
+| 댓글 수정/삭제 | ❌ | ❌ |
+| 앱 추가/수정/삭제 | ❌ | ✅ |
+| 즐겨찾기 관리 | ❌ | ✅ |
+| 설정 관리 | ❌ | ✅ |
+| GitHub 레포 스캔 | ❌ | ✅ |
 
-> **설계 의도**: 누구나 로그인 없이 앱 마켓을 탐색하고 사용할 수 있습니다.
-> 로그인한 사용자는 커뮤니티 기능(별점, 댓글)에 참여할 수 있고,
-> 관리자만 앱을 등록하고 관리할 수 있습니다.
+> **설계 의도**:
+> - **누구나 로그인 없이** 앱 마켓을 탐색하고, 별점/댓글을 남길 수 있습니다.
+> - 익명 댓글은 작성자 이름(`author_name`)을 입력하여 작성합니다.
+> - 익명 작성물은 수정/삭제가 불가능합니다 (스팸 방지는 Admin이 직접 관리).
+> - 관리자만 앱을 등록하고 관리할 수 있습니다.
 
 ---
 
@@ -202,15 +239,36 @@ GITHUB_USERNAME=garimto81
 | **Board** | 카테고리별 칸반 | 카테고리 정리 |
 | **Timeline** | 업데이트 순 | 최근 업데이트 확인 |
 
-### 4.5 별점 & 리뷰 시스템 (기존 유지)
+### 4.5 별점 & 리뷰 시스템 (익명 작성 지원)
 
 #### 별점 시스템
-- 1-5점 별점 (기존 구현 재사용)
+- 1-5점 별점
+- **익명 작성 가능** (로그인 불필요)
 - 평균/분포 표시
+- 중복 방지 없음 (나중에 IP 기반 제한 추가 가능)
 
 #### 리뷰 시스템
-- 댓글 CRUD (기존 구현 재사용)
-- 작성자 프로필 표시
+- 댓글 작성, 조회
+- **익명 작성 가능** (작성자 이름 `author_name` 입력)
+- 익명 댓글 표시: "홍길동 (게스트)"
+- 익명 작성물은 수정/삭제 불가
+- 스팸 관리: Admin이 직접 삭제
+
+**API 예시**:
+```typescript
+// 익명 댓글 작성
+POST /api/projects/{id}/comments
+{
+  "content": "정말 유용한 앱이네요!",
+  "author_name": "홍길동"
+}
+
+// 익명 별점 등록
+POST /api/projects/{id}/ratings
+{
+  "score": 5
+}
+```
 
 ### 4.6 앱 상태 모니터링 (선택적)
 

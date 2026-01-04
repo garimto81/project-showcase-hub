@@ -1,6 +1,5 @@
 "use client"
 
-import { useAuth } from '@/hooks/use-auth'
 import { useComments } from '@/hooks/use-comments'
 import { CommentForm } from './comment-form'
 import { CommentItem } from './comment-item'
@@ -11,7 +10,6 @@ interface CommentsSectionProps {
 }
 
 export function CommentsSection({ projectId }: CommentsSectionProps) {
-  const { isAuthenticated, loading: authLoading } = useAuth()
   const { comments, loading, addComment, updateComment, deleteComment } = useComments(projectId)
 
   if (loading) {
@@ -32,21 +30,16 @@ export function CommentsSection({ projectId }: CommentsSectionProps) {
 
   return (
     <div className="space-y-4">
-      {/* 댓글 작성 폼 */}
-      {!authLoading && (
-        <div>
-          {isAuthenticated ? (
-            <CommentForm
-              onSubmit={addComment}
-              placeholder="댓글을 남겨주세요..."
-            />
-          ) : (
-            <p className="text-sm text-muted-foreground py-4">
-              댓글을 작성하려면 로그인이 필요합니다.
-            </p>
-          )}
-        </div>
-      )}
+      {/* 댓글 작성 폼 (로그인 불필요) */}
+      <div>
+        <CommentForm
+          onSubmit={addComment}
+          placeholder="댓글을 남겨주세요..."
+        />
+        <p className="text-xs text-muted-foreground mt-2">
+          로그인 없이 누구나 댓글을 남길 수 있습니다. 익명 댓글은 수정/삭제가 불가능합니다.
+        </p>
+      </div>
 
       {/* 댓글 목록 */}
       {comments.length > 0 ? (

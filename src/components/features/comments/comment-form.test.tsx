@@ -1,11 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { CommentForm } from './comment-form'
 
 describe('CommentForm', () => {
   const mockOnSubmit = vi.fn()
-  const mockOnCancel = vi.fn()
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -13,10 +12,11 @@ describe('CommentForm', () => {
   })
 
   describe('렌더링', () => {
-    it('텍스트 영역을 렌더링한다', () => {
+    it('이름과 댓글 입력 필드를 렌더링한다', () => {
       render(<CommentForm onSubmit={mockOnSubmit} />)
 
-      expect(screen.getByRole('textbox')).toBeInTheDocument()
+      expect(screen.getByPlaceholderText('이름')).toBeInTheDocument()
+      expect(screen.getByPlaceholderText('댓글을 입력하세요...')).toBeInTheDocument()
     })
 
     it('기본 placeholder를 표시한다', () => {
@@ -38,13 +38,13 @@ describe('CommentForm', () => {
     })
 
     it('커스텀 제출 버튼 레이블을 표시한다', () => {
-      render(<CommentForm onSubmit={mockOnSubmit} submitLabel="수정" />)
+      render(<CommentForm onSubmit={mockOnSubmit} submitLabel="등록" />)
 
-      expect(screen.getByRole('button', { name: '수정' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: '등록' })).toBeInTheDocument()
     })
 
     it('onCancel이 있으면 취소 버튼을 표시한다', () => {
-      render(<CommentForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />)
+      render(<CommentForm onSubmit={mockOnSubmit} onCancel={vi.fn()} />)
 
       expect(screen.getByRole('button', { name: '취소' })).toBeInTheDocument()
     })
@@ -55,10 +55,10 @@ describe('CommentForm', () => {
       expect(screen.queryByRole('button', { name: '취소' })).not.toBeInTheDocument()
     })
 
-    it('initialValue로 텍스트 영역을 초기화한다', () => {
+    it('initialValue로 댓글 입력란을 초기화한다', () => {
       render(<CommentForm onSubmit={mockOnSubmit} initialValue="초기 텍스트" />)
 
-      expect(screen.getByRole('textbox')).toHaveValue('초기 텍스트')
+      expect(screen.getByPlaceholderText('댓글을 입력하세요...')).toHaveValue('초기 텍스트')
     })
   })
 
@@ -69,18 +69,36 @@ describe('CommentForm', () => {
       expect(screen.getByRole('button', { name: '작성' })).toBeDisabled()
     })
 
-    it('공백만 입력하면 제출 버튼이 비활성화된다', () => {
+    it('이름만 입력하면 제출 버튼이 비활성화된다', () => {
       render(<CommentForm onSubmit={mockOnSubmit} />)
 
-      fireEvent.change(screen.getByRole('textbox'), { target: { value: '   ' } })
+      fireEvent.change(screen.getByPlaceholderText('이름'), { target: { value: '홍길동' } })
 
       expect(screen.getByRole('button', { name: '작성' })).toBeDisabled()
     })
 
-    it('텍스트를 입력하면 제출 버튼이 활성화된다', () => {
+    it('댓글만 입력하면 제출 버튼이 비활성화된다', () => {
       render(<CommentForm onSubmit={mockOnSubmit} />)
 
-      fireEvent.change(screen.getByRole('textbox'), { target: { value: '댓글 내용' } })
+      fireEvent.change(screen.getByPlaceholderText('댓글을 입력하세요...'), { target: { value: '댓글' } })
+
+      expect(screen.getByRole('button', { name: '작성' })).toBeDisabled()
+    })
+
+    it('공백만 입력하면 제출 버튼이 비활성화된다', () => {
+      render(<CommentForm onSubmit={mockOnSubmit} />)
+
+      fireEvent.change(screen.getByPlaceholderText('이름'), { target: { value: '   ' } })
+      fireEvent.change(screen.getByPlaceholderText('댓글을 입력하세요...'), { target: { value: '   ' } })
+
+      expect(screen.getByRole('button', { name: '작성' })).toBeDisabled()
+    })
+
+    it('이름과 댓글을 모두 입력하면 제출 버튼이 활성화된다', () => {
+      render(<CommentForm onSubmit={mockOnSubmit} />)
+
+      fireEvent.change(screen.getByPlaceholderText('이름'), { target: { value: '홍길동' } })
+      fireEvent.change(screen.getByPlaceholderText('댓글을 입력하세요...'), { target: { value: '댓글 내용' } })
 
       expect(screen.getByRole('button', { name: '작성' })).not.toBeDisabled()
     })
@@ -91,11 +109,12 @@ describe('CommentForm', () => {
       const user = userEvent.setup()
       render(<CommentForm onSubmit={mockOnSubmit} />)
 
-      await user.type(screen.getByRole('textbox'), '새 댓글')
+      await user.type(screen.getByPlaceholderText('이름'), '홍길동')
+      await user.type(screen.getByPlaceholderText('댓글을 입력하세요...'), '새 댓글')
       await user.click(screen.getByRole('button', { name: '작성' }))
 
       await waitFor(() => {
-        expect(mockOnSubmit).toHaveBeenCalledWith('새 댓글')
+        expect(mockOnSubmit).toHaveBeenCalledWith('새 댓글', '홍길동')
       })
     })
 
@@ -103,23 +122,26 @@ describe('CommentForm', () => {
       const user = userEvent.setup()
       render(<CommentForm onSubmit={mockOnSubmit} />)
 
-      await user.type(screen.getByRole('textbox'), '  댓글 내용  ')
+      await user.type(screen.getByPlaceholderText('이름'), '  홍길동  ')
+      await user.type(screen.getByPlaceholderText('댓글을 입력하세요...'), '  댓글 내용  ')
       await user.click(screen.getByRole('button', { name: '작성' }))
 
       await waitFor(() => {
-        expect(mockOnSubmit).toHaveBeenCalledWith('댓글 내용')
+        expect(mockOnSubmit).toHaveBeenCalledWith('댓글 내용', '홍길동')
       })
     })
 
-    it('제출 성공 후 텍스트 영역이 비워진다', async () => {
+    it('제출 성공 후 입력 필드가 비워진다', async () => {
       const user = userEvent.setup()
       render(<CommentForm onSubmit={mockOnSubmit} />)
 
-      await user.type(screen.getByRole('textbox'), '댓글 내용')
+      await user.type(screen.getByPlaceholderText('이름'), '홍길동')
+      await user.type(screen.getByPlaceholderText('댓글을 입력하세요...'), '새 댓글')
       await user.click(screen.getByRole('button', { name: '작성' }))
 
       await waitFor(() => {
-        expect(screen.getByRole('textbox')).toHaveValue('')
+        expect(screen.getByPlaceholderText('이름')).toHaveValue('')
+        expect(screen.getByPlaceholderText('댓글을 입력하세요...')).toHaveValue('')
       })
     })
 
@@ -130,28 +152,32 @@ describe('CommentForm', () => {
       const user = userEvent.setup()
       render(<CommentForm onSubmit={mockOnSubmit} />)
 
-      await user.type(screen.getByRole('textbox'), '댓글')
+      await user.type(screen.getByPlaceholderText('이름'), '홍길동')
+      await user.type(screen.getByPlaceholderText('댓글을 입력하세요...'), '댓글')
       await user.click(screen.getByRole('button', { name: '작성' }))
 
       expect(screen.getByRole('button', { name: '등록 중...' })).toBeInTheDocument()
     })
 
-    it('제출 중 텍스트 영역이 비활성화된다', async () => {
+    it('제출 중 입력 필드가 비활성화된다', async () => {
       mockOnSubmit.mockImplementation(
         () => new Promise((resolve) => setTimeout(resolve, 100))
       )
       const user = userEvent.setup()
       render(<CommentForm onSubmit={mockOnSubmit} />)
 
-      await user.type(screen.getByRole('textbox'), '댓글')
+      await user.type(screen.getByPlaceholderText('이름'), '홍길동')
+      await user.type(screen.getByPlaceholderText('댓글을 입력하세요...'), '댓글')
       await user.click(screen.getByRole('button', { name: '작성' }))
 
-      expect(screen.getByRole('textbox')).toBeDisabled()
+      expect(screen.getByPlaceholderText('이름')).toBeDisabled()
+      expect(screen.getByPlaceholderText('댓글을 입력하세요...')).toBeDisabled()
     })
   })
 
   describe('취소', () => {
     it('취소 버튼 클릭 시 onCancel이 호출된다', async () => {
+      const mockOnCancel = vi.fn()
       const user = userEvent.setup()
       render(<CommentForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />)
 
