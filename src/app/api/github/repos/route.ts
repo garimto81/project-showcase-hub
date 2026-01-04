@@ -1,6 +1,7 @@
-import { cookies } from 'next/headers'
-import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { getSession } from '@/lib/auth/session'
+
+const GITHUB_USERNAME = process.env.GITHUB_USERNAME || 'garimto81'
 
 export interface GitHubRepo {
   id: number
@@ -24,51 +25,30 @@ export interface GitHubRepo {
 }
 
 export async function GET() {
-  const supabase = await createClient()
-
-  // 인증 확인
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
+  // 세션 기반 인증 확인
+  const session = await getSession()
+  if (!session.isAuthenticated) {
     return NextResponse.json({ error: '로그인이 필요합니다' }, { status: 401 })
   }
 
-  // GitHub 토큰 가져오기 (쿠키 → 세션 순서로 확인)
-  const cookieStore = await cookies()
-  let githubToken = cookieStore.get('github_token')?.value
-
-  // 쿠키에 없으면 세션에서 provider_token 확인
-  if (!githubToken) {
-    const { data: { session } } = await supabase.auth.getSession()
-    githubToken = session?.provider_token ?? undefined
-  }
-
-  if (!githubToken) {
-    return NextResponse.json(
-      { error: 'GitHub 토큰이 없습니다. GitHub으로 다시 로그인해주세요.' },
-      { status: 401 }
-    )
-  }
-
   try {
+    // 공개 API로 레포 목록 가져오기
     const response = await fetch(
-      'https://api.github.com/user/repos?sort=updated&per_page=100',
+      `https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=updated&per_page=100`,
       {
         headers: {
-          Authorization: `Bearer ${githubToken}`,
           Accept: 'application/vnd.github.v3+json',
           'User-Agent': 'Project-Showcase-Hub',
         },
+        next: { revalidate: 300 }, // 5분 캐싱
       }
     )
 
     if (!response.ok) {
-      if (response.status === 401) {
-        return NextResponse.json(
-          { error: 'GitHub 토큰이 만료되었습니다. 다시 로그인해주세요.' },
-          { status: 401 }
-        )
-      }
-      throw new Error(`GitHub API error: ${response.status}`)
+      return NextResponse.json(
+        { error: `GitHub API 오류: ${response.status}` },
+        { status: response.status }
+      )
     }
 
     const repos: GitHubRepo[] = await response.json()

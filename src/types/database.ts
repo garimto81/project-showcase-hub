@@ -76,7 +76,7 @@ export type Database = {
           id: string
           title: string
           description: string | null
-          owner_id: string
+          owner_id: string | null // nullable - 단일 사용자 시스템
           thumbnail_url: string | null
           created_at: string
           updated_at: string
@@ -90,7 +90,7 @@ export type Database = {
           id?: string
           title: string
           description?: string | null
-          owner_id: string
+          owner_id: string | null // nullable - 단일 사용자 시스템
           thumbnail_url?: string | null
           created_at?: string
           updated_at?: string
