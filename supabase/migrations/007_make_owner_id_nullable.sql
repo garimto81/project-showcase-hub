@@ -27,11 +27,15 @@ EXCEPTION
 END $$;
 
 -- 5. RLS 정책 업데이트 (owner_id 체크 제거)
--- 기존 정책 삭제
+-- 기존 정책 삭제 (모든 가능한 정책명)
 DROP POLICY IF EXISTS "Users can view all projects" ON projects;
 DROP POLICY IF EXISTS "Users can create projects" ON projects;
 DROP POLICY IF EXISTS "Users can update own projects" ON projects;
 DROP POLICY IF EXISTS "Users can delete own projects" ON projects;
+DROP POLICY IF EXISTS "Anyone can view projects" ON projects;
+DROP POLICY IF EXISTS "Authenticated users can create projects" ON projects;
+DROP POLICY IF EXISTS "Authenticated users can update projects" ON projects;
+DROP POLICY IF EXISTS "Authenticated users can delete projects" ON projects;
 
 -- 새 정책: 모든 사용자가 프로젝트 조회 가능
 CREATE POLICY "Anyone can view projects" ON projects
