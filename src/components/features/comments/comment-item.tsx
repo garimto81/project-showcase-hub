@@ -23,6 +23,7 @@ interface CommentItemProps {
 }
 
 export function CommentItem({ comment, onUpdate, onDelete }: CommentItemProps) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { isAuthenticated: _isAuthenticated } = useAuth()
   const [isEditing, setIsEditing] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)

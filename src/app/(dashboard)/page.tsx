@@ -56,6 +56,7 @@ export default function DashboardPage() {
   })
 
   const scanner = useRepoScanner()
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _autoScanTriggeredRef = useRef(false) // Reserved for future auto-scan feature
 
   const handleScan = useCallback(async () => {
