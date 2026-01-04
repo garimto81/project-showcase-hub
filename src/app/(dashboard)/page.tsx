@@ -51,7 +51,6 @@ export default function DashboardPage() {
   const [showScanResult, setShowScanResult] = useState(false)
 
   const { projects, loading, error, refetch, create } = useProjects({
-    userId: showMyProjects && isAuthenticated ? undefined : undefined, // TODO: 사용자 ID 로직 재구성 필요
     search: search || undefined,
   })
 
@@ -87,7 +86,7 @@ export default function DashboardPage() {
       description: app.description || null,
       url: app.url,
       thumbnail_url: app.thumbnailUrl || null,
-      owner_id: '', // TODO: 사용자 ID 로직 재구성 필요
+      owner_id: null,
     })
 
     if (!error) {

@@ -25,7 +25,7 @@ type CreateProjectData = {
   app_type?: AppType
   is_favorite?: boolean
   github_repo?: string | null
-  owner_id?: string
+  owner_id?: string | null
 }
 
 type UpdateProjectData = {

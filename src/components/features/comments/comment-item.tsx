@@ -23,12 +23,10 @@ interface CommentItemProps {
 }
 
 export function CommentItem({ comment, onUpdate, onDelete }: CommentItemProps) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { isAuthenticated: _isAuthenticated } = useAuth()
+  const { isAdmin } = useAuth()
   const [isEditing, setIsEditing] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
-  // TODO: 사용자 ID 비교 로직 재구성 필요
-  const isOwner = false
+  const isOwner = isAdmin
 
   const handleUpdate = async (content: string) => {
     await onUpdate(comment.id, content)

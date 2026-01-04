@@ -90,8 +90,7 @@ describe('useRating', () => {
         expect(result.current.loading).toBe(false)
       })
 
-      // TODO: 사용자 ID 로직이 구현되면 활성화
-      // userId가 undefined이므로 userRating은 null
+      // Single admin user - userId is undefined, userRating is null
       expect(result.current.userRating).toBeNull()
     })
 
@@ -188,7 +187,7 @@ describe('useRating', () => {
       )
 
       // fetchRatings가 호출된 후 userRating이 설정됨
-      // userId가 undefined이므로 userRating은 null로 유지됨 (TODO: userId 로직 구현 필요)
+      // Single admin user - userId is undefined, userRating remains null
       await waitFor(() => {
         expect(result.current.loading).toBe(false)
       })
@@ -226,8 +225,7 @@ describe('useRating', () => {
         expect(result.current.loading).toBe(false)
       })
 
-      // TODO: 사용자 ID 로직이 구현되면 활성화
-      // userId가 undefined이므로 초기 userRating은 null
+      // Single admin user - userId is undefined, userRating is null
       expect(result.current.userRating).toBeNull()
 
       await act(async () => {
@@ -239,7 +237,6 @@ describe('useRating', () => {
         expect(result.current.loading).toBe(false)
       })
 
-      // TODO: userId 로직이 구현되면 활성화
       // submitRating에서 setUserRating(score)로 즉시 업데이트되지만
       // fetchRatings에서 userId가 undefined이므로 null로 재설정됨
       expect(result.current.userRating).toBeNull()

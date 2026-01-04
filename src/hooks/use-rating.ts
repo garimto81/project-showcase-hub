@@ -23,7 +23,7 @@ export function useRating(projectId: string) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const userId = undefined // TODO: 사용자 ID 로직 재구성 필요
+  const userId = undefined // Single admin user - rating by userId not used
 
   const fetchRatings = useCallback(async () => {
     try {

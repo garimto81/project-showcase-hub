@@ -36,13 +36,12 @@ function ProjectsSkeleton() {
 }
 
 export default function ProjectsPage() {
-  const { isAuthenticated, isAdmin } = useAuth()
+  const { isAdmin } = useAuth()
   const [search, setSearch] = useState('')
   const [showMyProjects, setShowMyProjects] = useState(false)
   const [viewMode, setViewMode] = useState<ViewMode>('gallery')
 
   const { projects, loading, error } = useProjects({
-    userId: showMyProjects && isAuthenticated ? undefined : undefined, // TODO: 사용자 ID 로직 재구성 필요
     search: search || undefined,
   })
 
