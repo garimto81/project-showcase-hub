@@ -65,11 +65,11 @@ export async function POST(
     return apiError.badRequest('1-5 사이의 점수를 입력해주세요')
   }
 
-  // 사용자 ID 설정 (익명이면 Anonymous UUID)
-  const userId = user.role === 'anonymous' ? user.id : user.id
+  // 사용자 ID 설정 (익명이면 null로 RLS 정책 통과)
+  const userId = user.role === 'anonymous' ? null : user.id
 
   // 기존 별점 확인 (로그인 사용자만)
-  if (user.role !== 'anonymous') {
+  if (user.role !== 'anonymous' && userId) {
     const { data: existing } = await supabase
       .from('ratings')
       .select('id')

@@ -53,11 +53,11 @@ export async function POST(
   let authorName: string | null = null
 
   if (user.role === 'anonymous') {
-    // 익명 사용자: Anonymous UUID 사용, author_name 필수
+    // 익명 사용자: null로 RLS 정책 통과, author_name 필수
     if (!author_name?.trim()) {
       return apiError.badRequest('작성자 이름을 입력해주세요')
     }
-    userId = user.id
+    userId = null  // RLS 정책: user_id IS NULL 허용
     authorName = author_name.trim()
   } else {
     // 로그인 사용자: user_id 사용, author_name은 선택
