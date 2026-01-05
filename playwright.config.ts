@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 
 const PRODUCTION_URL = 'https://project-showcase-hub-phi.vercel.app'
+const LOCAL_URL = 'http://localhost:3000'
 const AUTH_FILE = 'tests/e2e/.auth/user.json'
 
 export default defineConfig({
@@ -11,7 +12,8 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   use: {
-    baseURL: process.env.BASE_URL || PRODUCTION_URL,
+    // CI 환경에서는 PRODUCTION_URL, 로컬에서는 LOCAL_URL 사용
+    baseURL: process.env.BASE_URL || (process.env.CI ? PRODUCTION_URL : LOCAL_URL),
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },

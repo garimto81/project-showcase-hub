@@ -2,11 +2,11 @@ import { test, expect } from '@playwright/test'
 
 /**
  * User 회원가입 및 로그인 통합 테스트
- * Production 환경에서 실제 Supabase Auth 기능 검증
+ * 로컬 환경에서 실제 Supabase Auth 기능 검증
  */
 
-test.describe('User 회원가입 및 로그인', () => {
-  // 테스트용 임시 계정 정보
+test.describe.serial('User 회원가입 및 로그인', () => {
+  // 테스트용 임시 계정 정보 (describe 레벨에서 고정)
   const testEmail = `test-${Date.now()}@example.com`
   const testPassword = 'Test123456!'
   const testDisplayName = 'Test User'
@@ -28,10 +28,9 @@ test.describe('User 회원가입 및 로그인', () => {
     // 4. 자동 로그인 후 대시보드로 리다이렉트 확인
     await expect(page).toHaveURL(/\/projects/, { timeout: 10000 })
 
-    // 5. 로그인 상태 확인 (로그아웃 버튼 또는 사용자 정보 표시)
-    // Note: UI에 따라 수정 필요
-    const isLoggedIn = await page.locator('text=/로그아웃|프로필/i').isVisible().catch(() => false)
-    expect(isLoggedIn).toBe(true)
+    // 5. 로그인 상태 확인 (Avatar 버튼 존재 여부)
+    const avatarButton = page.locator('button').filter({ has: page.locator('svg.lucide-user') })
+    await expect(avatarButton).toBeVisible()
   })
 
   test('User 로그아웃 후 재로그인', async ({ page }) => {
@@ -50,6 +49,10 @@ test.describe('User 회원가입 및 로그인', () => {
 
     // 5. 대시보드로 리다이렉트 확인
     await expect(page).toHaveURL(/\/projects/, { timeout: 10000 })
+
+    // 6. 로그인 상태 확인
+    const avatarButton = page.locator('button').filter({ has: page.locator('svg.lucide-user') })
+    await expect(avatarButton).toBeVisible()
   })
 
   test('잘못된 비밀번호로 로그인 실패', async ({ page }) => {
