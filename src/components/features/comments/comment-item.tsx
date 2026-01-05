@@ -33,7 +33,7 @@ export function CommentItem({ comment, onUpdate, onDelete }: CommentItemProps) {
   const canEdit = !isAnonymous && isAdmin
   const canDelete = isAdmin
 
-  const handleUpdate = async (content: string, _authorName: string) => {
+  const handleUpdate = async (content: string) => {
     await onUpdate(comment.id, content)
     setIsEditing(false)
   }
