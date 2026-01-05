@@ -58,8 +58,7 @@ export function useRating(projectId: string) {
   }, [fetchRatings])
 
   const submitRating = async (score: number) => {
-    if (!isAuthenticated) return
-
+    // 익명 사용자도 별점 등록 가능 (API에서 user_id=null로 처리)
     try {
       const response = await fetch(`/api/projects/${projectId}/ratings`, {
         method: 'POST',

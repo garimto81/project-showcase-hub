@@ -34,26 +34,25 @@ export function ProjectRating({ projectId }: ProjectRatingProps) {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base">
-              {isAuthenticated ? '내 평가' : '로그인하여 평가하기'}
+              {isAuthenticated ? '내 평가' : '평가하기'}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {isAuthenticated ? (
-              <div className="flex items-center gap-4">
-                <StarRating
-                  value={userRating ?? 0}
-                  onChange={submitRating}
-                  size="lg"
-                />
-                {userRating && (
-                  <span className="text-sm text-muted-foreground">
-                    {userRating}점을 주셨습니다
-                  </span>
-                )}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                프로젝트를 평가하려면 로그인이 필요합니다.
+            <div className="flex items-center gap-4">
+              <StarRating
+                value={userRating ?? 0}
+                onChange={submitRating}
+                size="lg"
+              />
+              {userRating && (
+                <span className="text-sm text-muted-foreground">
+                  {userRating}점을 주셨습니다
+                </span>
+              )}
+            </div>
+            {!isAuthenticated && (
+              <p className="text-xs text-muted-foreground mt-2">
+                익명으로 평가됩니다
               </p>
             )}
           </CardContent>
