@@ -103,7 +103,7 @@ export function LoginForm() {
               </div>
 
               {adminError && (
-                <p className="text-sm text-destructive">{adminError}</p>
+                <p className="text-sm text-destructive" role="alert">{adminError}</p>
               )}
 
               <Button type="submit" className="w-full" disabled={isAdminSubmitting}>
@@ -142,7 +142,7 @@ export function LoginForm() {
               </div>
 
               {userError && (
-                <p className="text-sm text-destructive">{userError}</p>
+                <p className="text-sm text-destructive" role="alert">{userError}</p>
               )}
 
               <Button type="submit" className="w-full" disabled={isUserSubmitting}>

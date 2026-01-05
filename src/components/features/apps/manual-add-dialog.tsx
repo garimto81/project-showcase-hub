@@ -154,7 +154,7 @@ export function ManualAddDialog({ onAdd }: ManualAddDialogProps) {
                 disabled={isLoading}
               />
             </div>
-            {error && <p className="text-sm text-destructive">{error}</p>}
+            {error && <p className="text-sm text-destructive" role="alert">{error}</p>}
           </div>
           <DialogFooter>
             <Button

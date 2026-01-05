@@ -101,7 +101,7 @@ export function GitHubReposSection() {
   if (error) {
     return (
       <div className="text-center py-12">
-        <p className="text-destructive mb-4">{error}</p>
+        <p className="text-destructive mb-4" role="alert">{error}</p>
         <Button onClick={refetch} variant="outline">
           <RefreshCw className="h-4 w-4 mr-2" />
           다시 시도
