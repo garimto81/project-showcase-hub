@@ -5,8 +5,9 @@
 팀과 개인이 프로젝트를 **타임라인**, **갤러리**, **칸반 보드** 등 다양한 뷰로 관리하고 공유할 수 있는 웹 애플리케이션입니다.
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
-[![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-green)](https://supabase.com/)
 
 ## Features
 
@@ -21,14 +22,14 @@
 
 | 영역 | 기술 |
 |------|------|
-| Framework | [Next.js 15](https://nextjs.org/) (App Router) |
-| Language | TypeScript |
+| Framework | [Next.js 16](https://nextjs.org/) (App Router, RSC) |
+| Language | TypeScript (strict mode) |
 | Styling | [Tailwind CSS v4](https://tailwindcss.com/) |
-| Components | [shadcn/ui](https://ui.shadcn.com/) |
+| Components | [shadcn/ui](https://ui.shadcn.com/) (new-york style) |
 | Database | [Supabase](https://supabase.com/) (PostgreSQL) |
-| Auth | Supabase Auth + RBAC |
-| State | Zustand + TanStack Query |
-| Deploy | Vercel |
+| Auth | 다중 인증 (Admin 비밀번호 + Supabase Auth + Anonymous) |
+| GitHub | 공개 API (/users/{username}/repos) |
+| Deploy | [Vercel](https://vercel.com/) |
 
 ## Getting Started
 
@@ -59,31 +60,38 @@ Open [http://localhost:3000](http://localhost:3000) with your browser.
 
 ### Environment Variables
 
+필수 환경변수를 `.env.local` 파일에 설정하세요:
+
 ```env
+# Supabase
 NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+
+# Admin 인증
+ADMIN_PASSWORD=your-secure-admin-password
+
+# GitHub (선택)
+GITHUB_USERNAME=your-github-username
+
+# Site URL (선택, 기본값: http://localhost:3000)
+NEXT_PUBLIC_SITE_URL=https://your-domain.vercel.app
 ```
 
-### OAuth 설정 (GitHub/Google 로그인)
+### 인증 시스템 (v2.4 다중 인증)
 
-GitHub 또는 Google 로그인을 사용하려면 추가 설정이 필요합니다.
+이 애플리케이션은 **3가지 인증 방식**을 지원합니다:
 
-#### GitHub OAuth
+| 인증 방식 | 설명 | 권한 |
+|-----------|------|------|
+| **Admin** | 환경변수 비밀번호 (`ADMIN_PASSWORD`) | 앱 CRUD 전체 권한 |
+| **User** | Supabase Auth (이메일/비밀번호 회원가입) | 댓글 작성, 별점 등록 |
+| **Anonymous** | 인증 없음 | 댓글 작성, 별점 등록 (익명) |
 
-1. [GitHub Developer Settings](https://github.com/settings/developers) → **OAuth Apps** → **New OAuth App**
-2. 설정:
-   - **Homepage URL**: `https://your-domain.vercel.app`
-   - **Authorization callback URL**: `https://your-project.supabase.co/auth/v1/callback`
-3. [Supabase Dashboard](https://supabase.com/dashboard) → **Authentication** → **Providers** → **GitHub** 활성화
-4. Client ID와 Client Secret 입력
+**로그인 페이지:** `/login`
+- Admin 탭: 환경변수 비밀번호 입력
+- User 탭: 이메일/비밀번호 로그인
 
-#### Google OAuth
-
-1. [Google Cloud Console](https://console.cloud.google.com/) → **APIs & Services** → **Credentials**
-2. **Create Credentials** → **OAuth client ID** → **Web application**
-3. Authorized redirect URIs에 추가: `https://your-project.supabase.co/auth/v1/callback`
-4. Supabase Dashboard → **Authentication** → **Providers** → **Google** 활성화
-5. Client ID와 Client Secret 입력
+**회원가입 페이지:** `/signup` (User 전용)
 
 ## Project Structure
 
@@ -102,12 +110,30 @@ src/
 
 ## Scripts
 
+### Development
+
 ```bash
-npm run dev      # Development server
-npm run build    # Production build
-npm run start    # Start production server
-npm run lint     # ESLint
+npm run dev          # Development server (localhost:3000)
+npm run build        # Production build
+npm run start        # Start production server
+npm run lint         # ESLint
 ```
+
+### Testing
+
+```bash
+# Unit Tests (Vitest)
+npm run test              # Watch mode
+npm run test:run          # Single run
+npm run test:coverage     # Coverage report
+
+# E2E Tests (Playwright)
+npm run test:e2e          # 공개 페이지 테스트 (chromium)
+npm run test:e2e:ui       # UI mode
+npm run test:e2e:auth     # 인증 필요 테스트 (setup + authenticated)
+```
+
+**참고:** E2E 테스트는 기본적으로 `localhost:3000`을 대상으로 실행됩니다. Production 테스트: `BASE_URL=https://your-domain.vercel.app npm run test:e2e`
 
 ## Contributing
 
