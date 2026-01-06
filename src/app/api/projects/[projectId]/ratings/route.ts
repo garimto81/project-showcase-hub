@@ -68,30 +68,34 @@ export async function POST(
   // 사용자 ID 설정 (익명이면 null로 RLS 정책 통과)
   const userId = user.role === 'anonymous' ? null : user.id
 
-  // 기존 별점 확인 (로그인 사용자만)
-  if (user.role !== 'anonymous' && userId) {
-    const { data: existing } = await supabase
+  // 기존 별점 확인 (로그인 사용자 및 익명 사용자 모두)
+  let existingQuery = supabase
+    .from('ratings')
+    .select('id')
+    .eq('project_id', projectId)
+
+  if (userId) {
+    existingQuery = existingQuery.eq('user_id', userId)
+  } else {
+    existingQuery = existingQuery.is('user_id', null)
+  }
+
+  const { data: existing } = await existingQuery.single()
+
+  if (existing) {
+    // 기존 별점 업데이트 (upsert)
+    const { data, error } = await supabase
       .from('ratings')
-      .select('id')
-      .eq('project_id', projectId)
-      .eq('user_id', userId)
+      .update({ score })
+      .eq('id', existing.id)
+      .select()
       .single()
 
-    if (existing) {
-      // 기존 별점 업데이트
-      const { data, error } = await supabase
-        .from('ratings')
-        .update({ score })
-        .eq('id', existing.id)
-        .select()
-        .single()
-
-      if (error) {
-        return apiError.serverError(error.message)
-      }
-
-      return apiSuccess.ok(data)
+    if (error) {
+      return apiError.serverError(error.message)
     }
+
+    return apiSuccess.ok(data)
   }
 
   // 새 별점 생성

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from '@/hooks/use-auth'
 import type { RatingWithProfile } from '@/types/database'
 
@@ -21,7 +21,9 @@ export function useRating(projectId: string) {
   })
   const [userRating, setUserRating] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const lastSubmittedScore = useRef<number | null>(null)
 
   const userId = undefined // Single admin user - rating by userId not used
 
@@ -58,7 +60,17 @@ export function useRating(projectId: string) {
   }, [fetchRatings])
 
   const submitRating = async (score: number) => {
-    // 익명 사용자도 별점 등록 가능 (API에서 user_id=null로 처리)
+    // 중복 요청 방지: 이미 제출 중이거나 동일 점수면 무시
+    if (submitting || score === lastSubmittedScore.current) {
+      return
+    }
+
+    // 낙관적 UI 업데이트
+    const previousRating = userRating
+    setUserRating(score)
+    setSubmitting(true)
+    lastSubmittedScore.current = score
+
     try {
       const response = await fetch(`/api/projects/${projectId}/ratings`, {
         method: 'POST',
@@ -67,13 +79,18 @@ export function useRating(projectId: string) {
       })
 
       if (!response.ok) {
+        // 실패 시 롤백
+        setUserRating(previousRating)
+        lastSubmittedScore.current = previousRating
         throw new Error('별점 등록에 실패했습니다')
       }
 
-      setUserRating(score)
+      // 성공 시 최신 데이터 동기화
       await fetchRatings()
     } catch (err) {
       setError(err instanceof Error ? err.message : '오류가 발생했습니다')
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -103,6 +120,7 @@ export function useRating(projectId: string) {
     distribution: data.distribution,
     userRating,
     loading,
+    submitting,
     error,
     submitRating,
     deleteRating,
