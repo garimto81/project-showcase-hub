@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Loader2 } from 'lucide-react'
 import Link from 'next/link'
 
 export function LoginForm() {
@@ -107,6 +108,7 @@ export function LoginForm() {
               )}
 
               <Button type="submit" className="w-full" disabled={isAdminSubmitting}>
+                {isAdminSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isAdminSubmitting ? '로그인 중...' : '로그인'}
               </Button>
             </form>
@@ -146,6 +148,7 @@ export function LoginForm() {
               )}
 
               <Button type="submit" className="w-full" disabled={isUserSubmitting}>
+                {isUserSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isUserSubmitting ? '로그인 중...' : '로그인'}
               </Button>
 
