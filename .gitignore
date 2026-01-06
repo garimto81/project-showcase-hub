@@ -51,3 +51,4 @@ test-*.png
 
 # Windows temp files
 nul
+.env*.local

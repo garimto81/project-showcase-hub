@@ -239,11 +239,11 @@ OAuth 없이 공개 API 사용:
 ### E2E Tests (Playwright)
 
 - 테스트 파일: `tests/e2e/*.spec.ts`
-- Base URL: `https://project-showcase-hub-phi.vercel.app` (production)
+- Base URL: `localhost:3000` (로컬) / CI에서는 production 자동 사용
 - 인증 상태: `tests/e2e/.auth/user.json`
 - 스크린샷: 실패 시에만 자동 저장
 
 **주의사항:**
-- E2E 테스트는 기본적으로 production 환경 대상
-- 로컬 테스트: `BASE_URL=http://localhost:3000 npm run test:e2e`
+- 로컬에서는 `npm run dev` 실행 후 테스트 실행 필요
+- Production 테스트: `BASE_URL=https://project-showcase-hub-phi.vercel.app npm run test:e2e`
 - 인증 필요 테스트는 별도 프로젝트로 실행 (`test:e2e:auth`)
