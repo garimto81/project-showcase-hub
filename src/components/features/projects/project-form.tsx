@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card'
 import { toast } from 'sonner'
+import { Camera, Loader2 } from 'lucide-react'
 
 type ProjectFormProps = {
   mode: 'create' | 'edit'
@@ -31,6 +32,46 @@ export function ProjectForm({ mode, initialData, onSubmit }: ProjectFormProps) {
   const [demoUrl, setDemoUrl] = useState(initialData?.url || '')
   const [githubRepo, setGithubRepo] = useState(initialData?.github_repo || '')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isGeneratingThumbnail, setIsGeneratingThumbnail] = useState(false)
+
+  // 썸네일 자동 생성 (GitHub Open Graph 또는 스크린샷)
+  const generateThumbnail = async () => {
+    // GitHub repo가 있으면 Open Graph 이미지 사용
+    if (githubRepo.trim()) {
+      const ogUrl = `https://opengraph.githubassets.com/1/${githubRepo.trim()}`
+      setThumbnailUrl(ogUrl)
+      toast.success('GitHub 썸네일이 생성되었습니다')
+      return
+    }
+
+    // 배포 URL이 있으면 스크린샷 API 사용
+    if (demoUrl.trim()) {
+      setIsGeneratingThumbnail(true)
+      try {
+        const microlinkUrl = `https://api.microlink.io/?url=${encodeURIComponent(demoUrl.trim())}&screenshot=true&meta=false`
+        const response = await fetch(microlinkUrl)
+
+        if (response.ok) {
+          const data = await response.json()
+          if (data.status === 'success' && data.data?.screenshot?.url) {
+            setThumbnailUrl(data.data.screenshot.url)
+            toast.success('스크린샷 썸네일이 생성되었습니다')
+            return
+          }
+        }
+        throw new Error('스크린샷 생성 실패')
+      } catch {
+        toast.error('썸네일 생성에 실패했습니다. URL을 확인해주세요.')
+      } finally {
+        setIsGeneratingThumbnail(false)
+      }
+      return
+    }
+
+    toast.error('GitHub 레포지토리 또는 배포 URL을 먼저 입력해주세요')
+  }
+
+  const canGenerateThumbnail = githubRepo.trim() || demoUrl.trim()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -92,14 +133,34 @@ export function ProjectForm({ mode, initialData, onSubmit }: ProjectFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="thumbnailUrl">썸네일 URL</Label>
-            <Input
-              id="thumbnailUrl"
-              type="url"
-              placeholder="https://example.com/image.jpg"
-              value={thumbnailUrl}
-              onChange={(e) => setThumbnailUrl(e.target.value)}
-              disabled={isSubmitting}
-            />
+            <div className="flex gap-2">
+              <Input
+                id="thumbnailUrl"
+                type="url"
+                placeholder="https://example.com/image.jpg"
+                value={thumbnailUrl}
+                onChange={(e) => setThumbnailUrl(e.target.value)}
+                disabled={isSubmitting || isGeneratingThumbnail}
+                className="flex-1"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={generateThumbnail}
+                disabled={isSubmitting || isGeneratingThumbnail || !canGenerateThumbnail}
+                title={canGenerateThumbnail ? '썸네일 자동 생성' : 'GitHub 레포 또는 배포 URL을 먼저 입력하세요'}
+              >
+                {isGeneratingThumbnail ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Camera className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              GitHub 레포 또는 배포 URL이 있으면 <Camera className="inline h-3 w-3" /> 버튼으로 자동 생성할 수 있습니다
+            </p>
             {thumbnailUrl && (
               <div className="mt-2 aspect-video max-w-xs overflow-hidden rounded-lg border relative">
                 <Image
