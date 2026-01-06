@@ -80,7 +80,7 @@ export async function POST(
     existingQuery = existingQuery.is('user_id', null)
   }
 
-  const { data: existing } = await existingQuery.single()
+  const { data: existing } = await existingQuery.limit(1).maybeSingle()
 
   if (existing) {
     // 기존 별점 업데이트 (upsert)
