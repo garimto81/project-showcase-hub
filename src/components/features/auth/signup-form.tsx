@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
+import { Loader2 } from 'lucide-react'
 import Link from 'next/link'
 
 export function SignupForm() {
@@ -121,6 +122,7 @@ export function SignupForm() {
           )}
 
           <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {isSubmitting ? '가입 중...' : '회원가입'}
           </Button>
 
