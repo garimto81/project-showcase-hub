@@ -5,6 +5,7 @@ import {
   apiError,
   apiSuccess,
 } from '@/lib/api/utils'
+import { resolveProjectThumbnail } from '@/lib/thumbnail'
 
 // GET: 프로젝트 목록 조회
 export async function GET(request: Request) {
@@ -89,12 +90,19 @@ export async function POST(request: Request) {
     return apiError.badRequest('프로젝트 제목은 필수입니다')
   }
 
+  // 썸네일 자동 생성 (입력값이 없고 URL/GitHub가 있는 경우)
+  const finalThumbnail = await resolveProjectThumbnail(
+    thumbnail_url,
+    github_repo,
+    url
+  )
+
   const { data, error } = await supabase
     .from('projects')
     .insert({
       title: title.trim(),
       description: description?.trim() || null,
-      thumbnail_url: thumbnail_url || null,
+      thumbnail_url: finalThumbnail,
       url: url?.trim() || null,
       github_repo: github_repo?.trim() || null,
       owner_id: authResult.user.id, // Admin UUID
