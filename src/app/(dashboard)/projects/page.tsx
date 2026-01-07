@@ -16,6 +16,7 @@ import {
   TimelineView,
   type ViewMode,
 } from '@/components/features/views'
+import { ManualAddDialog } from '@/components/features/apps'
 
 function ProjectsSkeleton() {
   return (
@@ -36,14 +37,37 @@ function ProjectsSkeleton() {
 }
 
 export default function ProjectsPage() {
-  const { isAdmin } = useAuth()
+  const { isAdmin, isAuthenticated } = useAuth()
   const [search, setSearch] = useState('')
   const [showMyProjects, setShowMyProjects] = useState(false)
   const [viewMode, setViewMode] = useState<ViewMode>('gallery')
 
-  const { projects, loading, error } = useProjects({
+  const { projects, loading, error, refetch, create } = useProjects({
     search: search || undefined,
   })
+
+  const handleManualAdd = async (app: {
+    title: string
+    url: string
+    description: string
+    thumbnailUrl?: string
+  }) => {
+    if (!isAuthenticated) return false
+
+    const { error } = await create({
+      title: app.title,
+      description: app.description || null,
+      url: app.url,
+      thumbnail_url: app.thumbnailUrl || null,
+      owner_id: null,
+    })
+
+    if (!error) {
+      refetch()
+      return true
+    }
+    return false
+  }
 
   const renderProjects = () => {
     if (loading) {
@@ -76,12 +100,15 @@ export default function ProjectsPage() {
             </p>
           </div>
           {isAdmin && (
-            <Link href="/projects/new">
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                새 프로젝트
-              </Button>
-            </Link>
+            <div className="flex gap-2">
+              <ManualAddDialog onAdd={handleManualAdd} />
+              <Link href="/projects/new">
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  새 프로젝트
+                </Button>
+              </Link>
+            </div>
           )}
         </div>
 
