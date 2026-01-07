@@ -15,6 +15,7 @@ import { createClient } from '@supabase/supabase-js'
 import { config } from 'dotenv'
 import { resolve } from 'path'
 import { existsSync } from 'fs'
+import sharp from 'sharp'
 
 // .env.local 로드 (dotenv v17 호환)
 const envPath = resolve(process.cwd(), '.env.local')
@@ -50,6 +51,14 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
   },
 })
 const THUMBNAIL_BUCKET = 'thumbnails'
+
+// 이미지 최적화 설정
+const IMAGE_CONFIG = {
+  width: 640,       // 썸네일 너비 (원본 1280 → 640)
+  height: 360,      // 썸네일 높이 (원본 720 → 360)
+  quality: 80,      // WebP 품질 (0-100)
+  format: 'webp' as const,
+}
 
 interface Project {
   id: string
@@ -121,21 +130,39 @@ async function captureScreenshot(url: string): Promise<Buffer> {
   }
 }
 
+/**
+ * 이미지 최적화 (리사이징 + WebP 변환)
+ */
+async function optimizeImage(imageBuffer: Buffer): Promise<Buffer> {
+  const optimized = await sharp(imageBuffer)
+    .resize(IMAGE_CONFIG.width, IMAGE_CONFIG.height, {
+      fit: 'cover',
+      position: 'top',
+    })
+    .webp({ quality: IMAGE_CONFIG.quality })
+    .toBuffer()
+
+  return optimized
+}
+
 async function uploadThumbnail(
   projectId: string,
   imageBuffer: Buffer
 ): Promise<string> {
-  const fileName = `${projectId}.png`
+  const fileName = `${projectId}.webp`
   const filePath = `projects/${fileName}`
 
-  // 기존 파일 삭제 (있으면)
-  await supabase.storage.from(THUMBNAIL_BUCKET).remove([filePath])
+  // 기존 파일 삭제 (png, webp 모두)
+  await supabase.storage.from(THUMBNAIL_BUCKET).remove([
+    `projects/${projectId}.png`,
+    `projects/${projectId}.webp`,
+  ])
 
-  // 새 파일 업로드
+  // 새 파일 업로드 (WebP)
   const { error } = await supabase.storage
     .from(THUMBNAIL_BUCKET)
     .upload(filePath, imageBuffer, {
-      contentType: 'image/png',
+      contentType: 'image/webp',
       upsert: true,
     })
 
@@ -203,8 +230,14 @@ async function main() {
     try {
       // 스크린샷 캡처
       console.log('  - 스크린샷 캡처 중...')
-      const imageBuffer = await captureScreenshot(project.url)
-      console.log(`  - 캡처 완료 (${imageBuffer.length} bytes)`)
+      const rawImage = await captureScreenshot(project.url)
+      console.log(`  - 캡처 완료 (원본: ${(rawImage.length / 1024).toFixed(1)}KB)`)
+
+      // 이미지 최적화
+      console.log('  - 이미지 최적화 중...')
+      const optimizedImage = await optimizeImage(rawImage)
+      const compressionRatio = ((1 - optimizedImage.length / rawImage.length) * 100).toFixed(1)
+      console.log(`  - 최적화 완료 (${(optimizedImage.length / 1024).toFixed(1)}KB, -${compressionRatio}%)`)
 
       if (dryRun) {
         console.log('  - [DRY RUN] 업로드 스킵\n')
@@ -214,7 +247,7 @@ async function main() {
 
       // Storage 업로드
       console.log('  - Supabase Storage 업로드 중...')
-      const thumbnailUrl = await uploadThumbnail(project.id, imageBuffer)
+      const thumbnailUrl = await uploadThumbnail(project.id, optimizedImage)
       console.log(`  - 업로드 완료: ${thumbnailUrl}`)
 
       // DB 업데이트
