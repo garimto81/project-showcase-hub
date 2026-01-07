@@ -12,21 +12,43 @@
 
 import { chromium } from 'playwright'
 import { createClient } from '@supabase/supabase-js'
-import * as dotenv from 'dotenv'
-import * as path from 'path'
+import { config } from 'dotenv'
+import { resolve } from 'path'
+import { existsSync } from 'fs'
 
-// .env.local 로드
-dotenv.config({ path: path.resolve(process.cwd(), '.env.local') })
+// .env.local 로드 (dotenv v17 호환)
+const envPath = resolve(process.cwd(), '.env.local')
+if (existsSync(envPath)) {
+  config({ path: envPath, override: true })
+}
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-if (!supabaseUrl || !supabaseAnonKey) {
+// Storage 업로드에는 service_role key 필요 (RLS 우회)
+const supabaseKey = supabaseServiceKey || supabaseAnonKey
+
+if (!supabaseUrl || !supabaseKey) {
   console.error('Supabase 환경 변수가 설정되지 않았습니다.')
+  console.error('')
+  console.error('.env.local 파일에 다음 변수가 필요합니다:')
+  console.error('  NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co')
+  console.error('  SUPABASE_SERVICE_ROLE_KEY=your-service-role-key (Storage 업로드용)')
+  console.error('')
   process.exit(1)
 }
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey)
+if (!supabaseServiceKey) {
+  console.warn('⚠️  SUPABASE_SERVICE_ROLE_KEY가 없습니다. Storage 업로드가 실패할 수 있습니다.')
+}
+
+const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+  },
+})
 const THUMBNAIL_BUCKET = 'thumbnails'
 
 interface Project {
