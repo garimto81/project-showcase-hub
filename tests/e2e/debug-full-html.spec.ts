@@ -1,6 +1,7 @@
 import { test } from '@playwright/test'
 
-test('디버그: 전체 HTML 덤프', async ({ page }) => {
+// 디버그용 테스트 - 필요 시 수동 실행
+test.skip('디버그: 전체 HTML 덤프', async ({ page }) => {
   await page.goto('/projects')
   await page.waitForLoadState('networkidle')
 
