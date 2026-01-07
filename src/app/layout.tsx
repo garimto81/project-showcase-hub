@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Project Showcase Hub",
-  description: "오픈소스 프로젝트 포트폴리오 관리 플랫폼",
+  title: "Aiden's Market",
+  description: "개인용 앱 마켓/대시보드 플랫폼",
 };
 
 export default function RootLayout({

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Project Showcase Hub** - 개인용 앱 마켓/대시보드 플랫폼
+**Aiden's Market** - 개인용 앱 마켓/대시보드 플랫폼
 
 자신이 개발하거나 사용하는 앱들을 한 곳에서 관리하고 빠르게 접근할 수 있는 웹 애플리케이션.
 

@@ -11,7 +11,7 @@ export function DashboardHeader() {
         <div className="flex">
           <Link href="/" className="flex items-center space-x-2">
             <Rocket className="h-5 w-5 text-primary" />
-            <span className="font-bold">AppHub</span>
+            <span className="font-bold">Aiden's Market</span>
           </Link>
         </div>
         <UserMenu />

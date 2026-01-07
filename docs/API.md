@@ -1,4 +1,4 @@
-# Project Showcase Hub API Reference
+# Aiden's Market API Reference
 
 > REST API 문서
 > Base URL: `/api`

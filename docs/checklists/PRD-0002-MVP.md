@@ -1,4 +1,4 @@
-# MVP 체크리스트: AppHub - Personal App Marketplace
+# MVP 체크리스트: Aiden's Market - Personal App Marketplace
 
 | 항목 | 값 |
 |------|---|
@@ -178,7 +178,7 @@
 
 ### 6.1 헤더 리브랜딩
 - [x] `src/components/layout/dashboard-header.tsx` 수정
-  - [x] "Project Showcase Hub" → "AppHub"
+  - [x] "Project Showcase Hub" → "Aiden's Market"
   - [x] Rocket 아이콘 추가
 
 ---
@@ -240,7 +240,7 @@
 | `src/components/features/views/gallery-view.tsx` | ProjectCard 컴포넌트 사용, 즐겨찾기 콜백 |
 | `src/hooks/use-projects.ts` | 즐겨찾기 토글, create 메서드, 타입 확장 |
 | `src/app/(dashboard)/page.tsx` | 스캔 UI 통합, 자동 스캔, 수동 추가 |
-| `src/components/layout/dashboard-header.tsx` | AppHub 브랜딩 |
+| `src/components/layout/dashboard-header.tsx` | Aiden's Market 브랜딩 |
 
 ### 신규 파일
 | 파일 | 설명 |
@@ -285,7 +285,7 @@
 
 2. **Vercel 배포**
    ```bash
-   git add . && git commit -m "feat: MVP - AppHub 전체 레포 자동 스캔 기능"
+   git add . && git commit -m "feat: MVP - Aiden's Market 전체 레포 자동 스캔 기능"
    git push
    ```
 

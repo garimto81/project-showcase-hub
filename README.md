@@ -1,8 +1,8 @@
-# Project Showcase Hub
+# Aiden's Market
 
-> 오픈소스 프로젝트 포트폴리오 관리 플랫폼
+> 개인용 앱 마켓/대시보드 플랫폼
 
-팀과 개인이 프로젝트를 **타임라인**, **갤러리**, **칸반 보드** 등 다양한 뷰로 관리하고 공유할 수 있는 웹 애플리케이션입니다.
+자신이 개발하거나 사용하는 앱들을 한 곳에서 관리하고 빠르게 접근할 수 있는 웹 애플리케이션입니다.
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
