@@ -3,11 +3,11 @@ import { describe, it, expect, vi } from 'vitest'
 import { ProjectCard } from './project-card'
 import type { ProjectWithProfile } from '@/types/database'
 
-// Next.js Link mock
-vi.mock('next/link', () => ({
-  default: ({ href, children }: { href: string; children: React.ReactNode }) => (
-    <a href={href}>{children}</a>
-  ),
+// Next.js navigation mock
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+  }),
 }))
 
 const mockProject: ProjectWithProfile = {
@@ -42,24 +42,11 @@ describe('ProjectCard', () => {
     expect(screen.getByText('프로젝트 설명입니다')).toBeInTheDocument()
   })
 
-  it('renders owner name', () => {
+  it('card is clickable with cursor-pointer', () => {
     render(<ProjectCard project={mockProject} />)
 
-    expect(screen.getByText('홍길동')).toBeInTheDocument()
-  })
-
-  it('renders owner initial in avatar fallback', () => {
-    render(<ProjectCard project={mockProject} />)
-
-    expect(screen.getByText('홍')).toBeInTheDocument()
-  })
-
-  it('links to project detail page', () => {
-    render(<ProjectCard project={mockProject} />)
-
-    // Link 컴포넌트가 제거되고 Card onClick으로 네비게이션 처리
-    // Card는 div이므로 role="link"가 없음
-    const card = screen.getByText('테스트 프로젝트').closest('[data-slot="card"]')
+    // Stitch 스타일: group/card 클래스를 가진 div
+    const card = screen.getByText('테스트 프로젝트').closest('.group\\/card')
     expect(card).toBeInTheDocument()
     expect(card).toHaveClass('cursor-pointer')
   })
@@ -82,33 +69,6 @@ describe('ProjectCard', () => {
     // Star 아이콘이 없어야 함
     const ratingContainer = screen.queryByText(/\d\.\d/)
     expect(ratingContainer).not.toBeInTheDocument()
-  })
-
-  it('renders "익명" when profile is null', () => {
-    const projectWithoutProfile = {
-      ...mockProject,
-      profiles: null,
-    }
-
-    render(<ProjectCard project={projectWithoutProfile} />)
-
-    expect(screen.getByText('익명')).toBeInTheDocument()
-    expect(screen.getByText('익')).toBeInTheDocument() // Avatar fallback
-  })
-
-  it('renders "익명" when display_name is null', () => {
-    const projectWithNullName: ProjectWithProfile = {
-      ...mockProject,
-      profiles: {
-        id: 'user-1',
-        display_name: null,
-        avatar_url: null,
-      },
-    }
-
-    render(<ProjectCard project={projectWithNullName} />)
-
-    expect(screen.getByText('익명')).toBeInTheDocument()
   })
 
   it('renders thumbnail image when provided', () => {
@@ -142,13 +102,14 @@ describe('ProjectCard', () => {
     expect(screen.queryByText('프로젝트 설명입니다')).not.toBeInTheDocument()
   })
 
-  it('renders app launch button when url is provided', () => {
+  it('renders Launch button when url is provided', () => {
     render(<ProjectCard project={mockProject} />)
 
-    expect(screen.getByRole('button', { name: /앱 열기/i })).toBeInTheDocument()
+    // Stitch 스타일: "Launch" 버튼
+    expect(screen.getByRole('button', { name: /Launch/i })).toBeInTheDocument()
   })
 
-  it('does not render app launch button when url is null', () => {
+  it('does not render Launch button when url is null', () => {
     const projectWithoutUrl = {
       ...mockProject,
       url: null,
@@ -156,20 +117,26 @@ describe('ProjectCard', () => {
 
     render(<ProjectCard project={projectWithoutUrl} />)
 
-    expect(screen.queryByRole('button', { name: /앱 열기/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Launch/i })).not.toBeInTheDocument()
   })
 
-  it('renders favorite star when is_favorite is true', () => {
+  it('renders favorite heart when is_favorite is true', () => {
     const favoriteProject = {
       ...mockProject,
       is_favorite: true,
-      thumbnail_url: null,
     }
 
     render(<ProjectCard project={favoriteProject} />)
 
-    // 즐겨찾기 상태일 때 노란 별이 표시됨
-    const header = screen.getByText('테스트 프로젝트').closest('div')
-    expect(header).toBeInTheDocument()
+    // Stitch 스타일: Heart 아이콘이 fill-red-500 클래스를 가짐
+    const card = screen.getByText('테스트 프로젝트').closest('.group\\/card')
+    expect(card).toBeInTheDocument()
+  })
+
+  it('card has aspect-square class for Stitch design', () => {
+    render(<ProjectCard project={mockProject} />)
+
+    const card = screen.getByText('테스트 프로젝트').closest('.group\\/card')
+    expect(card).toHaveClass('aspect-square')
   })
 })

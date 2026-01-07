@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Scan Complete</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0dccf2",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#101f22",
+                        "surface-dark": "#18282b",
+                        "surface-light": "#ffffff",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-[#111418] dark:text-white font-display overflow-x-hidden antialiased selection:bg-primary/30">
+<div class="relative flex h-full min-h-screen w-full flex-col">
+<!-- Header -->
+<div class="sticky top-0 z-10 flex items-center justify-between p-4 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md">
+<div class="flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 cursor-pointer transition-colors">
+<span class="material-symbols-outlined text-2xl">close</span>
+</div>
+<div class="flex w-10 items-center justify-end"></div>
+</div>
+<!-- Main Content -->
+<div class="flex-1 flex flex-col px-4 pb-32"> <!-- Added padding bottom for sticky footer -->
+<!-- Hero Section -->
+<div class="flex flex-col items-center gap-4 py-6">
+<div class="flex items-center justify-center size-20 rounded-full bg-primary/10 border border-primary/20 shadow-[0_0_15px_rgba(13,204,242,0.15)]">
+<span class="material-symbols-outlined text-5xl text-primary animate-pulse">check_circle</span>
+</div>
+<div class="text-center space-y-2">
+<h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Scan Complete!</h1>
+<p class="text-gray-500 dark:text-gray-400 text-sm max-w-[280px] mx-auto leading-relaxed">
+                        We successfully synced your GitHub repositories and registered your deployments.
+                    </p>
+</div>
+</div>
+<!-- Stats Card -->
+<div class="w-full mb-8">
+<div class="flex items-center justify-between gap-4 rounded-2xl bg-white dark:bg-surface-dark p-5 shadow-sm border border-gray-100 dark:border-white/5">
+<div class="flex flex-col gap-1">
+<p class="text-gray-500 dark:text-gray-400 text-sm font-medium uppercase tracking-wider">New Apps Added</p>
+<p class="text-4xl font-black tracking-tight text-primary">12</p>
+</div>
+<div class="size-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-2xl">apps</span>
+</div>
+</div>
+</div>
+<!-- Grid Header -->
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-xl font-bold dark:text-white">Registered Apps</h3>
+<span class="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded-full">New</span>
+</div>
+<!-- App Grid -->
+<div class="grid grid-cols-2 gap-4">
+<!-- Item 1 -->
+<div class="group flex flex-col gap-3 p-3 rounded-2xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-white/5 transition-all hover:border-primary/30">
+<div class="w-full aspect-square rounded-xl overflow-hidden bg-gray-800 relative">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="Abstract purple and blue gradient geometric pattern representing code structure" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD0QonuKzZGYIJ5SG17fVxQ7WB2aXyRuR5Q8kitcJ0-r1oeU88QnIVJdByl7j0J-ZETh8Sv3VCsRos-vlM9fF7YsjDvDs16gi-Fagy71qn1Zuml5dYZnsHgbRa8K89GhLOhGQbjjNCa_qhyy0FC0pXmJr2szD4N6wlgpRS4r5A6mCkYM-bSJBzepDiqRbgsiVrlXrhGOi2gfDvsrjIVBqdulDgdQU57qzDMJevbRu5QmkOy9ave367ipMNkgQBCaIsgOZAqRhPbP0Q");'></div>
+<div class="absolute top-2 right-2 bg-black/60 backdrop-blur-sm p-1 rounded-md text-primary">
+<span class="material-symbols-outlined text-sm block">rocket_launch</span>
+</div>
+</div>
+<div>
+<p class="text-gray-900 dark:text-white text-base font-bold leading-tight truncate">Project Alpha</p>
+<p class="text-primary text-xs font-medium mt-1">Next.js</p>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="group flex flex-col gap-3 p-3 rounded-2xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-white/5 transition-all hover:border-primary/30">
+<div class="w-full aspect-square rounded-xl overflow-hidden bg-gray-800 relative">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="Minimalist orange checklist interface mockup" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC2KXvmu3aOlwAxEssBYdUweRHNbEfdA4u-aK4F_UTy_tPvFXFeIiac2_reWv1fK4pbBWBChKRhLPk6z4o3zv3Y2G601_a6eWGug_XiIU-LGf3F4dqlWYtsBytHKGLECK8EMs8E_wxtBGSuj7ERmz4BPgFF9vuuKEO0EJsa3PmBoa-PJwuws_LWU_-NuIunMSEu8mOUFQrzJVQ2nNxp-nSR7UqEqRT50ao6PE0llkubmpJwZkayATnlaiIvBscqZ4orIR12NlplWiw");'></div>
+</div>
+<div>
+<p class="text-gray-900 dark:text-white text-base font-bold leading-tight truncate">ToDo React</p>
+<p class="text-primary text-xs font-medium mt-1">React Native</p>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="group flex flex-col gap-3 p-3 rounded-2xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-white/5 transition-all hover:border-primary/30">
+<div class="w-full aspect-square rounded-xl overflow-hidden bg-gray-800 relative">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="Green graph line chart showing financial growth" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDqFemVY1-8DTE1cPXLy4S_Wn1KbFXII8XzIuqbJieKmrgIrnfpTOkOAhH7orfQCv6IH_YU7Koy3QJZvvChBFUBUe7SFn7Nm89IFIf5i9XpLQPRO5jYsN4Cgl9MjQ_odx6DPdJl8wD8hbYsdxDWBU65iILlSi7SN1neePT2dlY1f2WO8gBLxD0IxuZVmxiekJAlQhUfXW2jaqPvEBKstFYyOf-eFw08SNeDBFnS9Nen0sf9QcUE9FeiBhtf5Rudw0HQo-o1OUMemA8");'></div>
+</div>
+<div>
+<p class="text-gray-900 dark:text-white text-base font-bold leading-tight truncate">Finance Tracker</p>
+<p class="text-primary text-xs font-medium mt-1">Vue.js</p>
+</div>
+</div>
+<!-- Item 4 -->
+<div class="group flex flex-col gap-3 p-3 rounded-2xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-white/5 transition-all hover:border-primary/30">
+<div class="w-full aspect-square rounded-xl overflow-hidden bg-gray-800 relative">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="Modern artistic portfolio layout with typography" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDqY5E_js6RWlMypj9zblqyJJaMsGD51IU3x_x0c8Wm1ZZTgr9D1xXjO2ooSIYjUnEdqe3GXUvZVGZNtolX-oDVp93xx6_m0xczmeGpZ2goOr1o5EqWBIPqTD-t9xVbDKP6J7XRJwB8QMFZq6cOcOcFeQmR82ey0BhtaUR7ML3ruSlssxXzIQVrqBCkU3nLN9sOAlylwQpI3U9CnpwJHsYHk6uFKDUUiXRs-4vveweByzGMZGJKAH4zwbPezgsLShWq4MmtuHv10z4");'></div>
+</div>
+<div>
+<p class="text-gray-900 dark:text-white text-base font-bold leading-tight truncate">Portfolio v2</p>
+<p class="text-primary text-xs font-medium mt-1">Svelte</p>
+</div>
+</div>
+<!-- Item 5 -->
+<div class="group flex flex-col gap-3 p-3 rounded-2xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-white/5 transition-all hover:border-primary/30">
+<div class="w-full aspect-square rounded-xl overflow-hidden bg-gray-800 relative">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="Content management system dashboard interface" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDtVRuWXk2M-a5gj8XEE1vshlKmp-Z8cYVxh2HFF_Jjiuq9J1QnPT4V5zO5oBtD_idzZPW3Lx2SpcZcgMdZhmWx1b6Il2_nYK1VP-1b3deDDdqmUAkdgqtQ9x6k0DVrfYJk4Oc9liJBZesIW67-ypZjL_h_DidTap1f0Y3cmBqb-cTJSR4GCDts39sn4zHKkWsqtD0V5I7GQ1nMP7DhAyH51ifclkQTIr2D1aoiAx39rjsB6pD53fgsh58z6jCffOJLVTmrUrWTDTM");'></div>
+</div>
+<div>
+<p class="text-gray-900 dark:text-white text-base font-bold leading-tight truncate">Blog CMS</p>
+<p class="text-primary text-xs font-medium mt-1">Gatsby</p>
+</div>
+</div>
+<!-- Item 6 -->
+<div class="group flex flex-col gap-3 p-3 rounded-2xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-white/5 transition-all hover:border-primary/30">
+<div class="w-full aspect-square rounded-xl overflow-hidden bg-gray-800 relative">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="Blue sky with white clouds weather app icon" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAWIPfMEyV9OiKoi_4QaXSntM4jP2n9Uf8ethDDNLpZBLnf0z03rP6uaJuvgVsFwTw7ovq3grq0z7UjpEBHIQnDvFWBjNVpiou8fZGKqSQOXc9lPW11Uj_wJHO4rXail9ORdGHaCU-ErVMY_5bcpwrCWDGEa1V_8LCVk2iGb3Zm8WrTTE2sVaDJieYe3QJ4SjtDr_Rue0nO3tUqRimwcOqy2IKeRrcG5WqcLnop1oAu6_8yr7_OB4IQkaDLZB1TEZakdq5gArmT2hI");'></div>
+</div>
+<div>
+<p class="text-gray-900 dark:text-white text-base font-bold leading-tight truncate">Weather App</p>
+<p class="text-primary text-xs font-medium mt-1">Swift</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Sticky Footer -->
+<div class="fixed bottom-0 left-0 w-full z-20">
+<!-- Gradient Fade -->
+<div class="h-12 w-full bg-gradient-to-b from-transparent to-background-light dark:to-background-dark pointer-events-none"></div>
+<div class="bg-background-light dark:bg-background-dark border-t border-gray-200 dark:border-white/5 p-4 pb-8 space-y-4">
+<!-- Exclusion Note -->
+<div class="flex items-center justify-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+<span class="material-symbols-outlined text-sm">info</span>
+<p>3 repositories were excluded based on config.</p>
+</div>
+<!-- CTA Button -->
+<button class="w-full bg-primary hover:bg-primary/90 active:scale-[0.98] transition-all text-background-dark font-bold text-lg h-14 rounded-xl flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(13,204,242,0.25)]">
+<span>View My App Market</span>
+<span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</body></html>

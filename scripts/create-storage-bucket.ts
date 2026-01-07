@@ -57,7 +57,7 @@ async function createBucket() {
   }
 
   // 버킷 생성
-  const { data, error } = await supabase.storage.createBucket('thumbnails', {
+  const { error } = await supabase.storage.createBucket('thumbnails', {
     public: true,
     fileSizeLimit: 5 * 1024 * 1024, // 5MB
     allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp'],

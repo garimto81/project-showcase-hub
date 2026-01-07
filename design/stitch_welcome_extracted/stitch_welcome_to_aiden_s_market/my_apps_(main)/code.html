@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Aiden's Market - My Apps</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0dccf2",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#101f22",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for better aesthetics on desktop preview */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #283639;
+            border-radius: 3px;
+        }
+        
+        /* Mobile-first touch interactions */
+        .app-card-overlay {
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+        }
+        /* Toggle overlay on focus/active for touch devices simulation */
+        .group\/card:focus-within .app-card-overlay,
+        .group\/card:active .app-card-overlay,
+        .group\/card:hover .app-card-overlay {
+            opacity: 1;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-gray-900 dark:text-white overflow-hidden">
+<div class="relative flex h-full min-h-screen w-full flex-col max-w-md mx-auto border-x border-gray-200 dark:border-gray-800 shadow-2xl">
+<!-- Sticky Header -->
+<header class="sticky top-0 z-20 flex items-center justify-between bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm px-5 py-4 border-b border-gray-200 dark:border-gray-800/50">
+<h1 class="text-xl font-bold tracking-tight">Aiden's Market</h1>
+<div class="flex items-center gap-4">
+<button aria-label="Rescan Apps" class="flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[24px]">sync</span>
+</button>
+<button aria-label="Manual Add" class="flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[24px]">add</span>
+</button>
+</div>
+</header>
+<!-- Main Content Area: App Grid -->
+<main class="flex-1 overflow-y-auto p-4 scroll-smooth">
+<!-- Quick Status / Notification (Optional Context) -->
+<div class="mb-6 flex items-center gap-3 rounded-lg bg-primary/10 p-3 text-sm text-primary border border-primary/20">
+<span class="material-symbols-outlined text-[20px]">check_circle</span>
+<span>Scan complete. 3 new apps found.</span>
+</div>
+<!-- Grid -->
+<div class="grid grid-cols-2 gap-4 pb-20">
+<!-- Card 1: Project Alpha -->
+<div class="group/card relative aspect-square w-full cursor-pointer overflow-hidden rounded-xl bg-gray-200 dark:bg-gray-800 shadow-sm" tabindex="0">
+<!-- Thumbnail Image -->
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover/card:scale-110" data-alt="Modern abstract dashboard interface with data visualization charts" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCc4bf1-yGTjIFh2pn3AJwG89z7vmSfn6r7aJM0dptjagQyVjgiSC6qhQX-iRHVtE2nRP2Im5wL4i37uYNEv4olS5VGVFL_1f74lVM0B1gEhdF_9evu6K10MiNxsrPN1CHgLB5QreoJG0JhSoK6dqf7haiGaBC1vqYhclFkhSL3b9LT7fDYZ9_evEb5s3JRfB4V6ux5Z9ZSOkKVVR5tVzzioHGez2dBTlx9Wi_xGPA8-6pZSRAwJyfJzdTq2HA35jVNVoXi_ndAsTA');">
+</div>
+<!-- Overlay (Visible on Hover/Tap) -->
+<div class="app-card-overlay absolute inset-0 flex flex-col justify-end bg-black/80 p-3 backdrop-blur-[2px]">
+<div class="flex items-start justify-between mb-1">
+<h3 class="text-sm font-bold text-white line-clamp-1">Project Alpha</h3>
+<button class="text-gray-400 hover:text-red-500 transition-colors">
+<span class="material-symbols-outlined text-[20px] fill-current">favorite</span>
+</button>
+</div>
+<p class="mb-3 text-xs text-gray-300 line-clamp-1">Internal data visualization tool.</p>
+<button class="w-full rounded bg-primary py-2 text-xs font-semibold text-black hover:bg-primary/90 transition-colors flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[16px]">rocket_launch</span>
+                            Launch
+                        </button>
+</div>
+</div>
+<!-- Card 2: Dev Tools -->
+<div class="group/card relative aspect-square w-full cursor-pointer overflow-hidden rounded-xl bg-gray-200 dark:bg-gray-800 shadow-sm" tabindex="0">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover/card:scale-110" data-alt="Close up of code on a dark computer screen" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDvIe97twQALNfVoaMFybUMjFu5-0Ho4sKRoprMzgZco1TU39Mia_eqRQbd_JV-0kE_mTdhzb5qwoYcO1xHfR9wTwZUIk2m0g5r4MzKlHvmLKlE6UQLkpcFWssSuBD_ZFxCYqOUV1Du4TpWY7_6UHejelzVvO9jbU7CqS_Wt5CeMCOJ0i0IIIVxuI4pdSFCiJpLvnc0m3tBv_ISRLcqjq5N_4a2pb4Er6NfLZBB9UiWhoFHnVWi-angp9MwM59CFJTL6BgYhkmGs3k');">
+</div>
+<div class="app-card-overlay absolute inset-0 flex flex-col justify-end bg-black/80 p-3 backdrop-blur-[2px]">
+<div class="flex items-start justify-between mb-1">
+<h3 class="text-sm font-bold text-white line-clamp-1">Dev Tools</h3>
+<button class="text-gray-400 hover:text-red-500 transition-colors">
+<span class="material-symbols-outlined text-[20px]">favorite</span>
+</button>
+</div>
+<p class="mb-3 text-xs text-gray-300 line-clamp-1">Utilities for daily debugging.</p>
+<button class="w-full rounded bg-primary py-2 text-xs font-semibold text-black hover:bg-primary/90 transition-colors flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[16px]">rocket_launch</span>
+                            Launch
+                        </button>
+</div>
+</div>
+<!-- Card 3: Analytics Dash -->
+<div class="group/card relative aspect-square w-full cursor-pointer overflow-hidden rounded-xl bg-gray-200 dark:bg-gray-800 shadow-sm" tabindex="0">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover/card:scale-110" data-alt="Graph chart showing upward trend with blue lighting" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAdI7Qb5xxqQkLWDbX-73Z5nAeiqDNKwup9QW2NHrq-8zwzPKqAO1WnO93PIMRzg6gh17nHPp1daeD5W-zJnS-AFGy-8ALWn8P7JQB6TcEQwRZbBFpADq8unAYN_S9UP1d3G7Yd1O7riNpfB7yn0ySrVb_JkqoAjnhflEL8Iv_obCXuyAxL1iBeNSGwplzWn5WOFvz0q7GaEyJN5ViPfIpJi6acGNyxLVXiTxmt9u6S47bSazPp74MbuHPtOPNoZl14l5lFzgXC2WQ');">
+</div>
+<div class="app-card-overlay absolute inset-0 flex flex-col justify-end bg-black/80 p-3 backdrop-blur-[2px]">
+<div class="flex items-start justify-between mb-1">
+<h3 class="text-sm font-bold text-white line-clamp-1">Analytics Dash</h3>
+<button class="text-red-500 hover:text-red-400 transition-colors">
+<span class="material-symbols-outlined text-[20px] fill-current" style="font-variation-settings: 'FILL' 1">favorite</span>
+</button>
+</div>
+<p class="mb-3 text-xs text-gray-300 line-clamp-1">Real-time server metrics.</p>
+<button class="w-full rounded bg-primary py-2 text-xs font-semibold text-black hover:bg-primary/90 transition-colors flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[16px]">rocket_launch</span>
+                            Launch
+                        </button>
+</div>
+</div>
+<!-- Card 4: Marketing Site -->
+<div class="group/card relative aspect-square w-full cursor-pointer overflow-hidden rounded-xl bg-gray-200 dark:bg-gray-800 shadow-sm" tabindex="0">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover/card:scale-110" data-alt="Minimalist website layout on a laptop screen" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBtzJq4LwCNPOzIeMAYsaff4FYV6UAwmhRdXackLqIn58T_4V-W_bgBvIQYYi86lyHNy8v-54wfIctzPf76eUZMkC9JOCpf6161pkrpTWWOytNspR5U32ZwD_ebW9a1hG8qVI8xANiXLs0DwrXBV2lQfOWuW3GVy-FO_QBVogtk4sjrVQ2nKqKb75tZqjzVNcjmomFVKsrGWMkZsROcEK5Xy2y05fJcfE_bsLrrh_41MTTbtY40S7ntA_OZR-9la_ChCJhBqYo9slA');">
+</div>
+<div class="app-card-overlay absolute inset-0 flex flex-col justify-end bg-black/80 p-3 backdrop-blur-[2px]">
+<div class="flex items-start justify-between mb-1">
+<h3 class="text-sm font-bold text-white line-clamp-1">Marketing Site</h3>
+<button class="text-gray-400 hover:text-red-500 transition-colors">
+<span class="material-symbols-outlined text-[20px]">favorite</span>
+</button>
+</div>
+<p class="mb-3 text-xs text-gray-300 line-clamp-1">Landing page v2.0 staging.</p>
+<button class="w-full rounded bg-primary py-2 text-xs font-semibold text-black hover:bg-primary/90 transition-colors flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[16px]">rocket_launch</span>
+                            Launch
+                        </button>
+</div>
+</div>
+<!-- Card 5: CRM Portal -->
+<div class="group/card relative aspect-square w-full cursor-pointer overflow-hidden rounded-xl bg-gray-200 dark:bg-gray-800 shadow-sm" tabindex="0">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover/card:scale-110" data-alt="Business professionals collaborating with digital tablet" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCVCMhLQrzXstt4CWXEPhGMAazFzqAkjN3dN5NqziM3aunOoYWCGanUDsnU0G_5q6vXweAzDjr_hVoZM5SNAllTEM9XAcG9ZwSIIilfkeK8_i6Nm1Z6cyWKQHu22ASSQLCOxPrxy5WdbOYatC459evWQGNpQp3H9c2GashhPEQHle2BORNg1aQP83z2qp6gBJfOwNewhVUzl0OE6HRZcmPbTzIAo0z-33YiCrW0g2vFNYpMdVCX0Fz8A0FgmSNnVdGZTBwj757C5wg');">
+</div>
+<div class="app-card-overlay absolute inset-0 flex flex-col justify-end bg-black/80 p-3 backdrop-blur-[2px]">
+<div class="flex items-start justify-between mb-1">
+<h3 class="text-sm font-bold text-white line-clamp-1">CRM Portal</h3>
+<button class="text-gray-400 hover:text-red-500 transition-colors">
+<span class="material-symbols-outlined text-[20px]">favorite</span>
+</button>
+</div>
+<p class="mb-3 text-xs text-gray-300 line-clamp-1">Client management system.</p>
+<button class="w-full rounded bg-primary py-2 text-xs font-semibold text-black hover:bg-primary/90 transition-colors flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[16px]">rocket_launch</span>
+                            Launch
+                        </button>
+</div>
+</div>
+<!-- Card 6: Design System -->
+<div class="group/card relative aspect-square w-full cursor-pointer overflow-hidden rounded-xl bg-gray-200 dark:bg-gray-800 shadow-sm" tabindex="0">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover/card:scale-110" data-alt="Abstract colorful geometric shapes gradient" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuClMCEcCuaaV2beP4khnVH60oXxFqcusRJh0BGPRQSvshD_5hK0aOxoAp5YkdgtZetVoTmKk_oFo4ykAlqz43dhSb_pBVwyFHqSDYWeq1VEGg6c87NyTKarOYtkPT4N3tP-4LnWqI76Ob2QOOBNgFljwRC0ASvyI_lOEc9QculuToewkFhlEQhCJxg9K0bz7YyR7p75Jym12yRfHq8I-tFElTSmtIpEyO08dFIq2t2jOTrhTaRJfBOBj-TVVtJe0sTulaPS-XhsMKw');">
+</div>
+<div class="app-card-overlay absolute inset-0 flex flex-col justify-end bg-black/80 p-3 backdrop-blur-[2px]">
+<div class="flex items-start justify-between mb-1">
+<h3 class="text-sm font-bold text-white line-clamp-1">Design System</h3>
+<button class="text-gray-400 hover:text-red-500 transition-colors">
+<span class="material-symbols-outlined text-[20px]">favorite</span>
+</button>
+</div>
+<p class="mb-3 text-xs text-gray-300 line-clamp-1">Component library explorer.</p>
+<button class="w-full rounded bg-primary py-2 text-xs font-semibold text-black hover:bg-primary/90 transition-colors flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[16px]">rocket_launch</span>
+                            Launch
+                        </button>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="sticky bottom-0 z-20 w-full border-t border-gray-200 dark:border-gray-800 bg-background-light/95 dark:bg-[#152326]/95 backdrop-blur-md pb-safe">
+<div class="flex h-16 items-center justify-around px-2">
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined text-[24px] font-variation-settings-fill">dashboard</span>
+<span class="text-[10px] font-medium">Apps</span>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px]">sync_alt</span>
+<span class="text-[10px] font-medium">Sync</span>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px]">settings</span>
+<span class="text-[10px] font-medium">Settings</span>
+</a>
+</div>
+<!-- iOS Home Indicator Spacing -->
+<div class="h-1 w-full bg-transparent"></div>
+</nav>
+</div>
+</body></html>

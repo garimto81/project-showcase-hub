@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Scanning Repositories</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0dccf2",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#101f22",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar hide for cleaner mobile look */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display antialiased overflow-hidden">
+<div class="relative flex h-full min-h-screen w-full flex-col overflow-hidden max-w-md mx-auto shadow-2xl bg-background-light dark:bg-background-dark">
+<!-- Top App Bar -->
+<div class="flex items-center px-4 pt-6 pb-2 justify-between shrink-0 z-10 bg-background-light dark:bg-background-dark/95 backdrop-blur-sm sticky top-0">
+<h2 class="text-lg font-bold leading-tight tracking-tight flex-1">Scanning GitHub</h2>
+<button class="flex items-center justify-end px-2 py-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
+<span class="text-slate-500 dark:text-slate-400 text-sm font-medium">Cancel</span>
+</button>
+</div>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto no-scrollbar pb-24">
+<!-- Progress Section -->
+<div class="flex flex-col gap-4 p-6">
+<!-- Circular Progress or Large Visual -->
+<div class="flex justify-center py-6">
+<div class="relative size-40 flex items-center justify-center">
+<!-- Background Circle -->
+<svg class="size-full -rotate-90 transform" viewbox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+<path class="text-slate-200 dark:text-slate-800" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3"></path>
+<path class="text-primary drop-shadow-[0_0_10px_rgba(13,204,242,0.5)] transition-all duration-1000 ease-out" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="45, 100" stroke-linecap="round" stroke-width="3"></path>
+</svg>
+<!-- Center Text -->
+<div class="absolute flex flex-col items-center justify-center text-center">
+<span class="text-4xl font-bold tracking-tighter">45%</span>
+<span class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">Complete</span>
+</div>
+</div>
+</div>
+<!-- Text Status -->
+<div class="flex flex-col gap-1 text-center">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">12 of 48 Repositories Analyzed</p>
+<div class="flex items-center justify-center gap-2 text-primary">
+<span class="material-symbols-outlined animate-spin text-sm" style="font-size: 18px;">sync</span>
+<p class="text-sm font-semibold truncate max-w-[250px]">Checking: user/ecommerce-api...</p>
+</div>
+</div>
+</div>
+<!-- List Header -->
+<div class="px-4 pt-4 pb-2 sticky top-0 bg-background-light dark:bg-background-dark z-0">
+<div class="flex items-center justify-between">
+<h3 class="text-lg font-bold tracking-tight">Detected Apps</h3>
+<span class="bg-primary/20 text-primary text-xs font-bold px-2 py-1 rounded-full">3 Found</span>
+</div>
+</div>
+<!-- List Items -->
+<div class="flex flex-col px-4 gap-3">
+<!-- Item 1 -->
+<div class="flex items-center gap-4 bg-white dark:bg-[#1C1C1E] p-3 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm">
+<div class="relative shrink-0">
+<div class="bg-center bg-no-repeat bg-cover rounded-lg size-12 bg-slate-100 dark:bg-slate-800" data-alt="Abstract geometric logo representing a portfolio site" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDkql8n73gfz1fQYy1MqgIEtQpHS1ZpZS3UdyrWYmo2gdPJN057Egy2rG_0e4WOfSQ6D408HYAmjEu2jgJSdED4Mg6LrEE1ZI1qrzO43WnJ0BG792Av5I1Q7AtxuIqRgCAqEjzCM79x6pvTrdrtFTjJ_pDLy6xLPj92FAGkU5eZOL2ngpIXStfoRGLCjj3cpcfUCyRG4fK21usLPAuWDJauBLd7Afpn_LB4z0WcS9cIX7DlOwQd7Z3Ux6RVSD2LTxjiCuumKIfjcp8");'></div>
+<div class="absolute -bottom-1 -right-1 bg-black dark:bg-white rounded-full p-0.5 border-2 border-white dark:border-[#1C1C1E]">
+<span class="material-symbols-outlined text-[10px] text-white dark:text-black leading-none block">code</span>
+</div>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-center justify-between mb-0.5">
+<p class="text-base font-semibold truncate pr-2">Portfolio Site</p>
+<span class="shrink-0 text-green-500 material-symbols-outlined text-[20px]">check_circle</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">Vercel</span>
+<span class="text-xs text-slate-400 dark:text-slate-500">•</span>
+<span class="text-xs text-slate-500 dark:text-slate-400 truncate">Next.js Framework</span>
+</div>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex items-center gap-4 bg-white dark:bg-[#1C1C1E] p-3 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm">
+<div class="relative shrink-0">
+<div class="bg-center bg-no-repeat bg-cover rounded-lg size-12 bg-slate-100 dark:bg-slate-800" data-alt="Dark abstract dashboard pattern" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB7ScogyIm9Twtvf5J5FdAsQWtBz7-NTBL_YtOU6ssUeeOPDe0jexevC_ckou3RjAODeu4-986TihUn9PoLTMNag477RGYlG2OjNjxoCYf_CHa9QEFCBDQpU9pdH2xBKMo-_5ITaG-uh_Et_adBehmYIwl5Uo3mZD3mVBZeXVX1KWcWZ4tMnhgJ58p5K19xOfp6noFyGDdBd11k-TWbr6Mp9CJ3CdhQ8cEFeKW0k8w2KTmdSMtxFp1i6ZhDY2K5fIsBCofc2Dp5lqo");'></div>
+<div class="absolute -bottom-1 -right-1 bg-black dark:bg-white rounded-full p-0.5 border-2 border-white dark:border-[#1C1C1E]">
+<span class="material-symbols-outlined text-[10px] text-white dark:text-black leading-none block">terminal</span>
+</div>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-center justify-between mb-0.5">
+<p class="text-base font-semibold truncate pr-2">Crypto Tracker API</p>
+<span class="shrink-0 text-green-500 material-symbols-outlined text-[20px]">check_circle</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">AWS Lambda</span>
+<span class="text-xs text-slate-400 dark:text-slate-500">•</span>
+<span class="text-xs text-slate-500 dark:text-slate-400 truncate">Node.js</span>
+</div>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="flex items-center gap-4 bg-white dark:bg-[#1C1C1E] p-3 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm opacity-50">
+<div class="relative shrink-0">
+<div class="bg-center bg-no-repeat bg-cover rounded-lg size-12 bg-slate-100 dark:bg-slate-800 grayscale" data-alt="Blurred interface design mockup" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAxlq5n7iKO9sJ0QrzWnPyMBaovt-3c1_5_umM3sOV8CBzJlwFJ75cHsny49QtDpT3SkXsP6LbcJuYgryQnDNchG07_tFXK36971EEw7H58nTiCCiRZZGALld_MAdta9c4s4Ynqsz5aGb3G336qkZhOCHnix1Q-_8w4kKdwkyteCZWXB5ngLo_ie7GgZQHa7yDfJeKzT4iArQlg7P11Oe32W0AG0isAYwoQT9K8lY-tOIa_nX7o28i6l40jlWt5nQgIKANOn9tSHkU");'></div>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-center justify-between mb-0.5">
+<p class="text-base font-semibold truncate pr-2">Task Manager v2</p>
+<!-- Spinner for processing item -->
+<span class="shrink-0 text-primary material-symbols-outlined animate-spin text-[20px]">progress_activity</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-xs text-slate-500 dark:text-slate-400 truncate">Identifying tech stack...</span>
+</div>
+</div>
+</div>
+<!-- Item 4 Skeleton/Loading state -->
+<div class="flex items-center gap-4 bg-transparent p-2 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+<div class="size-12 rounded-lg bg-slate-200 dark:bg-slate-800 animate-pulse"></div>
+<div class="flex flex-col flex-1 gap-2">
+<div class="h-4 w-24 bg-slate-200 dark:bg-slate-800 rounded animate-pulse"></div>
+<div class="h-3 w-32 bg-slate-200 dark:bg-slate-800 rounded animate-pulse"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Sticky Bottom Action -->
+<div class="absolute bottom-0 w-full p-4 bg-gradient-to-t from-background-light via-background-light to-transparent dark:from-background-dark dark:via-background-dark pt-10">
+<button class="w-full h-12 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 font-semibold text-base transition-all flex items-center justify-center gap-2 cursor-not-allowed" disabled="">
+<span>Scanning in progress...</span>
+</button>
+<!-- Alternate state (hidden for now, would replace the above button when done) -->
+<!-- 
+            <button class="w-full h-12 rounded-xl bg-primary hover:bg-cyan-400 text-white dark:text-slate-900 font-bold text-base shadow-[0_0_20px_rgba(13,204,242,0.3)] transition-all flex items-center justify-center gap-2">
+                <span>Continue</span>
+                <span class="material-symbols-outlined text-sm">arrow_forward</span>
+            </button> 
+            -->
+</div>
+</div>
+</body></html>

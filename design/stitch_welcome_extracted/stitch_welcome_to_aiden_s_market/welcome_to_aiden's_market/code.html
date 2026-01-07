@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Welcome to Aiden's Market</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0dccf2",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#101f22",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white antialiased overflow-hidden selection:bg-primary selection:text-background-dark">
+<div class="relative flex h-full min-h-screen w-full flex-col justify-between overflow-y-auto no-scrollbar">
+<!-- Top Section: Hero & Text -->
+<div class="flex-1 flex flex-col items-center justify-center w-full px-6 pt-10 pb-4 max-w-[480px] mx-auto">
+<!-- Hero Illustration -->
+<div class="relative w-full aspect-[4/3] max-w-[340px] mb-8 group">
+<!-- Ambient Glow Effect -->
+<div class="absolute inset-0 bg-primary/20 dark:bg-primary/10 blur-[50px] rounded-full transform scale-90 transition-all duration-700"></div>
+<!-- Main Image Container -->
+<div class="relative w-full h-full bg-center bg-cover bg-no-repeat rounded-2xl shadow-2xl ring-1 ring-slate-900/5 dark:ring-white/5 overflow-hidden z-10" data-alt="Cybersecurity concept illustration with blue padlock and digital code rain background representing secure app syncing" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB0UHVUTkl10ukw5gtdclHlt3Js-cz5TZCBMYNEoL64ClelKLkuK9mftqw9L0YcnVro7Co4JhMlsb0jxaCsgKC7U7p8XPBWj_RHNDHtaVtKkZGHF01jUVCucoiu06AyKiX-m94nZ4KvfSBzOx6y9aT31Z3eOlO3ZXMdunSYxUwNnoOGzP3W-c--7kZ7WrHwM59gMGP8vBuoDzRHk363lMdph96HCU6s3iB0c7WN3qZ_Yq8nu7sqPMYKbTabFTCRgrZvehYV-TGgYBE");'>
+<!-- Gradient Overlay for smooth blending -->
+<div class="absolute inset-0 bg-gradient-to-t from-background-light dark:from-background-dark via-transparent to-transparent opacity-90"></div>
+<div class="absolute inset-0 bg-primary/10 mix-blend-overlay"></div>
+</div>
+<!-- Floating Icon Badge -->
+<div class="absolute -bottom-5 left-1/2 -translate-x-1/2 bg-background-light dark:bg-background-dark border border-slate-100 dark:border-slate-800 p-4 rounded-2xl shadow-xl z-20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-[36px]">cloud_sync</span>
+</div>
+</div>
+<!-- Headlines -->
+<div class="flex flex-col items-center text-center mt-8 space-y-4 z-10">
+<h1 class="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 dark:text-white leading-tight">
+                    Welcome to <span class="text-primary">Aiden's Market</span>
+</h1>
+<p class="text-slate-600 dark:text-slate-400 text-base font-normal leading-relaxed max-w-xs mx-auto">
+                    Your personal app command center. Connect your GitHub account to automatically scan, register, and organize your deployed applications.
+                </p>
+</div>
+</div>
+<!-- Bottom Section: Actions -->
+<div class="w-full bg-background-light dark:bg-background-dark px-6 pb-12 pt-4 z-20">
+<div class="flex flex-col items-center gap-3 w-full max-w-[480px] mx-auto">
+<!-- Trust Indicator -->
+<div class="flex items-center gap-1.5 mb-2 opacity-90 py-1 px-3 rounded-full bg-slate-200/50 dark:bg-white/5">
+<span class="material-symbols-outlined text-emerald-500 text-[16px]">verified_user</span>
+<span class="text-xs font-medium text-slate-600 dark:text-slate-300">Secure read-only access</span>
+</div>
+<!-- Primary Button -->
+<button class="group relative w-full cursor-pointer flex items-center justify-center gap-3 overflow-hidden rounded-xl h-14 px-6 bg-primary hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20 active:scale-[0.99] transition-all duration-200">
+<!-- Subtle background shine effect -->
+<div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
+<span class="material-symbols-outlined text-background-dark text-[24px] relative z-10">hub</span>
+<span class="text-background-dark text-base font-bold tracking-wide relative z-10">Link GitHub Account</span>
+</button>
+<!-- Secondary Button -->
+<button class="flex w-full cursor-pointer items-center justify-center rounded-lg h-12 px-4 bg-transparent hover:bg-slate-200 dark:hover:bg-white/5 transition-colors">
+<span class="text-slate-500 dark:text-slate-400 text-sm font-semibold tracking-wide">Add apps manually</span>
+</button>
+<!-- Disclaimer / Footer -->
+<p class="text-[11px] text-slate-400 dark:text-slate-600 text-center mt-4 max-w-[280px] leading-tight">
+                    We only scan public repositories and active deployments. Your private code remains private.
+                </p>
+</div>
+</div>
+</div>
+</body></html>
