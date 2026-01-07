@@ -1,34 +1,31 @@
 "use client"
 
-import { useState, useEffect, useCallback } from 'react'
+import { useEffect, useRef } from 'react'
+import { useFetch } from './use-fetch'
 import type { CommentWithProfile } from '@/types/database'
 
 export function useComments(projectId: string) {
-  const [comments, setComments] = useState<CommentWithProfile[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const {
+    data: comments,
+    loading,
+    error,
+    refetch: fetchComments,
+    setData: setComments,
+    setError,
+  } = useFetch<CommentWithProfile[]>({
+    url: () => `/api/projects/${projectId}/comments`,
+    initialData: [],
+    defaultErrorMessage: '댓글을 불러오는데 실패했습니다',
+  })
 
-  const fetchComments = useCallback(async () => {
-    try {
-      setLoading(true)
-      const response = await fetch(`/api/projects/${projectId}/comments`)
-
-      if (!response.ok) {
-        throw new Error('댓글을 불러오는데 실패했습니다')
-      }
-
-      const data = await response.json()
-      setComments(data)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : '오류가 발생했습니다')
-    } finally {
-      setLoading(false)
-    }
-  }, [projectId])
-
+  // projectId 변경 시 refetch
+  const prevProjectIdRef = useRef(projectId)
   useEffect(() => {
-    fetchComments()
-  }, [fetchComments])
+    if (prevProjectIdRef.current !== projectId) {
+      prevProjectIdRef.current = projectId
+      fetchComments()
+    }
+  }, [projectId, fetchComments])
 
   const addComment = async (content: string, authorName: string) => {
     try {

@@ -78,7 +78,8 @@ describe('useComments', () => {
         expect(result.current.loading).toBe(false)
       })
 
-      expect(result.current.error).toBe('댓글을 불러오는데 실패했습니다')
+      // useFetch는 서버 응답의 error 메시지를 우선 사용
+      expect(result.current.error).toBe('서버 오류')
       expect(result.current.comments).toHaveLength(0)
     })
 

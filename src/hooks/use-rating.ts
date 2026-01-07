@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { useAuth } from '@/hooks/use-auth'
+import { useFetch } from './use-fetch'
 import type { RatingWithProfile } from '@/types/database'
 
 interface RatingData {
@@ -11,53 +12,30 @@ interface RatingData {
   distribution: Record<number, number>
 }
 
+const initialRatingData: RatingData = {
+  ratings: [],
+  average: 0,
+  total: 0,
+  distribution: {},
+}
+
 export function useRating(projectId: string) {
   const { isAuthenticated } = useAuth()
-  const [data, setData] = useState<RatingData>({
-    ratings: [],
-    average: 0,
-    total: 0,
-    distribution: {},
-  })
   const [userRating, setUserRating] = useState<number | null>(null)
-  const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const lastSubmittedScore = useRef<number | null>(null)
 
-  const userId = undefined // Single admin user - rating by userId not used
-
-  const fetchRatings = useCallback(async () => {
-    try {
-      setLoading(true)
-      const response = await fetch(`/api/projects/${projectId}/ratings`)
-
-      if (!response.ok) {
-        throw new Error('별점을 불러오는데 실패했습니다')
-      }
-
-      const result = await response.json()
-      setData(result)
-
-      // 현재 사용자의 별점 찾기
-      if (userId) {
-        const myRating = result.ratings.find(
-          (r: RatingWithProfile) => r.user_id === userId
-        )
-        setUserRating(myRating?.score ?? null)
-      } else {
-        setUserRating(null)
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : '오류가 발생했습니다')
-    } finally {
-      setLoading(false)
-    }
-  }, [projectId, userId])
-
-  useEffect(() => {
-    fetchRatings()
-  }, [fetchRatings])
+  const {
+    data,
+    loading,
+    error,
+    refetch: fetchRatings,
+    setError,
+  } = useFetch<RatingData>({
+    url: `/api/projects/${projectId}/ratings`,
+    initialData: initialRatingData,
+    defaultErrorMessage: '별점을 불러오는데 실패했습니다',
+  })
 
   const submitRating = async (score: number) => {
     // 중복 요청 방지: 이미 제출 중이거나 동일 점수면 무시

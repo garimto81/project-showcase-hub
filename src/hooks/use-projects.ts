@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
+import { useFetch } from './use-fetch'
 import type { ProjectWithProfile, AppType } from '@/types/database'
 
 type ProjectsResponse = {
@@ -37,45 +38,56 @@ type UpdateProjectData = {
   is_favorite?: boolean
 }
 
+function buildProjectsUrl(options: UseProjectsOptions): string {
+  const { userId, search, limit = 20, favoritesOnly } = options
+  const params = new URLSearchParams()
+  if (userId) params.set('userId', userId)
+  if (search) params.set('search', search)
+  if (favoritesOnly) params.set('favoritesOnly', 'true')
+  params.set('limit', limit.toString())
+  params.set('offset', '0')
+  return `/api/projects?${params}`
+}
+
 export function useProjects(options: UseProjectsOptions = {}) {
   const { userId, search, limit = 20, favoritesOnly } = options
-  const [projects, setProjects] = useState<ProjectWithProfile[]>([])
   const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
-  const fetchProjects = useCallback(async (offset = 0) => {
-    setLoading(true)
-    setError(null)
+  const {
+    data: projects,
+    loading,
+    error,
+    refetch,
+    setData: setProjects,
+    setError,
+  } = useFetch<ProjectWithProfile[], ProjectsResponse>({
+    url: () => buildProjectsUrl(options),
+    initialData: [],
+    defaultErrorMessage: '프로젝트를 불러오는데 실패했습니다',
+    transform: (response) => {
+      setTotal(response.total)
+      return response.projects
+    },
+  })
 
-    try {
-      const params = new URLSearchParams()
-      if (userId) params.set('userId', userId)
-      if (search) params.set('search', search)
-      if (favoritesOnly) params.set('favoritesOnly', 'true')
-      params.set('limit', limit.toString())
-      params.set('offset', offset.toString())
-
-      const response = await fetch(`/api/projects?${params}`)
-      const data: ProjectsResponse = await response.json()
-
-      if (!response.ok) {
-        throw new Error(
-          (data as unknown as { error: string }).error ||
-            '프로젝트를 불러오는데 실패했습니다'
-        )
-      }
-
-      setProjects(data.projects)
-      setTotal(data.total)
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다'
-      )
-    } finally {
-      setLoading(false)
+  // 옵션 변경 시 refetch
+  const optionsRef = useRef({ userId, search, limit, favoritesOnly })
+  useEffect(() => {
+    const prev = optionsRef.current
+    if (
+      prev.userId !== userId ||
+      prev.search !== search ||
+      prev.limit !== limit ||
+      prev.favoritesOnly !== favoritesOnly
+    ) {
+      optionsRef.current = { userId, search, limit, favoritesOnly }
+      refetch()
     }
-  }, [userId, search, limit, favoritesOnly])
+  }, [userId, search, limit, favoritesOnly, refetch])
+
+  const fetchProjects = useCallback(async () => {
+    await refetch()
+  }, [refetch])
 
   const create = async (
     data: CreateProjectData
@@ -174,10 +186,6 @@ export function useProjects(options: UseProjectsOptions = {}) {
       throw err
     }
   }
-
-  useEffect(() => {
-    fetchProjects()
-  }, [fetchProjects])
 
   return {
     projects,

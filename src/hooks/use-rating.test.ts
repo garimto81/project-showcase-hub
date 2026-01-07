@@ -126,7 +126,8 @@ describe('useRating', () => {
         expect(result.current.loading).toBe(false)
       })
 
-      expect(result.current.error).toBe('별점을 불러오는데 실패했습니다')
+      // useFetch는 서버 응답의 error 메시지를 우선 사용
+      expect(result.current.error).toBe('서버 오류')
     })
 
     it('네트워크 오류 시 에러 메시지를 설정한다', async () => {
@@ -186,13 +187,12 @@ describe('useRating', () => {
         }
       )
 
-      // fetchRatings가 호출된 후 userRating이 설정됨
-      // Single admin user - userId is undefined, userRating remains null
+      // fetchRatings가 호출된 후에도 submitRating에서 설정한 userRating이 유지됨
       await waitFor(() => {
         expect(result.current.loading).toBe(false)
       })
-      // setUserRating(5)로 즉시 설정되지만 fetchRatings에서 null로 재설정됨
-      expect(result.current.userRating).toBeNull()
+      // submitRating에서 setUserRating(5)로 설정된 값이 유지됨
+      expect(result.current.userRating).toBe(5)
     })
 
     it('별점 등록 후 userRating을 즉시 업데이트한다', async () => {
@@ -237,9 +237,8 @@ describe('useRating', () => {
         expect(result.current.loading).toBe(false)
       })
 
-      // submitRating에서 setUserRating(score)로 즉시 업데이트되지만
-      // fetchRatings에서 userId가 undefined이므로 null로 재설정됨
-      expect(result.current.userRating).toBeNull()
+      // submitRating에서 setUserRating(score)로 즉시 업데이트되고 유지됨
+      expect(result.current.userRating).toBe(3)
     })
 
     it('별점 등록 실패 시 에러를 설정한다', async () => {
