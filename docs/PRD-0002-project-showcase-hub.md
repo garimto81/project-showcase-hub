@@ -2,7 +2,7 @@
 
 | 항목 | 값 |
 |------|---|
-| **Version** | 2.5.0 |
+| **Version** | 2.5.1 |
 | **Status** | In Progress |
 | **Priority** | P0 |
 | **Created** | 2025-12-26 |
@@ -69,6 +69,10 @@
 |------|----------|------|
 | **Guest** (비로그인) | 인증 불필요 | 앱 조회 + **별점/댓글 작성** ✨ |
 | **Admin** | 환경변수 비밀번호 | 앱 CRUD + 설정 관리 |
+
+> **Note (v2.5.1)**: OAuth 소셜 로그인(GitHub/Google)은 **미구현 상태**입니다.
+> E2E 테스트에서 OAuth 관련 테스트는 skip 처리되어 있습니다.
+> 현재는 Admin 비밀번호 로그인 + User 이메일/비밀번호 로그인만 지원합니다.
 
 **환경변수**:
 ```bash
@@ -825,55 +829,62 @@ CREATE INDEX IF NOT EXISTS idx_projects_is_favorite ON projects(is_favorite);
 ```
 MVP 구현 순서:
 
-1. [ ] DB 마이그레이션
-   - [ ] url, app_type, is_favorite, github_repo 필드 추가
-   - [ ] 인덱스 생성
+1. [x] DB 마이그레이션
+   - [x] url, app_type, is_favorite, github_repo 필드 추가
+   - [x] 인덱스 생성
 
-2. [ ] 타입 정의 업데이트
-   - [ ] Project 인터페이스 확장
-   - [ ] ScanStatus, ScanResult 타입 정의
+2. [x] 타입 정의 업데이트
+   - [x] Project 인터페이스 확장
+   - [x] ScanStatus, ScanResult 타입 정의
 
-3. [ ] 배포 URL 탐지 기능
-   - [ ] deployment-detector.ts 구현
-     - [ ] GitHub API (homepage, Pages, Environments)
-     - [ ] README 파싱 (Demo/Live 링크, 배지 URL)
-     - [ ] URL 유효성 검증 (HEAD 요청)
-   - [ ] detect-deployment API 엔드포인트
+3. [x] 배포 URL 탐지 기능
+   - [x] deployment-detector.ts 구현
+     - [x] GitHub API (homepage, Pages, Environments)
+     - [x] README 파싱 (Demo/Live 링크, 배지 URL)
+     - [x] URL 유효성 검증 (HEAD 요청)
+   - [x] detect-deployment API 엔드포인트
 
-4. [ ] 전체 레포 자동 스캔 기능
-   - [ ] repo-scanner.ts 구현
-     - [ ] 전체 레포 목록 조회
-     - [ ] 병렬 배포 URL 탐지
-     - [ ] 앱 자동 생성 (벌크 insert)
-   - [ ] scan-all API 엔드포인트
-   - [ ] use-repo-scanner.ts 훅 (상태 관리)
+4. [x] 전체 레포 자동 스캔 기능
+   - [x] repo-scanner.ts 구현
+     - [x] 전체 레포 목록 조회
+     - [x] 병렬 배포 URL 탐지
+     - [x] 앱 자동 생성 (벌크 insert)
+   - [x] scan-all API 엔드포인트
+   - [x] use-repo-scanner.ts 훅 (상태 관리)
 
-5. [ ] 스캔 UI 컴포넌트
-   - [ ] scan-progress.tsx (진행 상황)
-   - [ ] scan-results.tsx (완료 결과)
-   - [ ] 메인 페이지에 스캔 상태 통합
+5. [x] 스캔 UI 컴포넌트
+   - [x] scan-progress.tsx (진행 상황)
+   - [x] scan-results.tsx (완료 결과)
+   - [x] 메인 페이지에 스캔 상태 통합
 
-6. [ ] GitHub 연동 시 자동 스캔 트리거
-   - [ ] auth-context.tsx에 스캔 시작 로직
-   - [ ] 최초 연동 시 자동 실행
-   - [ ] "다시 스캔" 버튼
+6. [x] GitHub 연동 시 자동 스캔 트리거
+   - [x] auth-context.tsx에 스캔 시작 로직
+   - [x] 최초 연동 시 자동 실행
+   - [x] "다시 스캔" 버튼
 
-7. [ ] 앱 카드 수정
-   - [ ] "앱 열기" 버튼 추가
+7. [x] 앱 카드 수정 (v2.5)
+   - [x] 썸네일 중심 UI (호버 오버레이)
+   - [x] "앱 열기" 버튼 추가
    - [ ] 즐겨찾기 토글 버튼 추가
 
 8. [ ] 수동 앱 추가
    - [ ] manual-add-dialog.tsx
    - [ ] URL 직접 입력 폼
 
-9. [ ] 헤더 리브랜딩 (Project Showcase → Aiden's Market)
+9. [x] 헤더 리브랜딩 (Project Showcase → Aiden's Market)
 
-10. [ ] 테스트
-    - [ ] GitHub 연동 → 자동 스캔 → 앱 배치 플로우
-    - [ ] 다시 스캔 동작
-    - [ ] 앱 열기 동작
+10. [x] 테스트
+    - [x] GitHub 연동 → 자동 스캔 → 앱 배치 플로우
+    - [x] 다시 스캔 동작
+    - [x] 앱 열기 동작
     - [ ] 즐겨찾기 토글 동작
     - [ ] 수동 앱 추가 동작
+
+11. [x] Stitch 디자인 시스템 적용 (v2.5)
+    - [x] 다크 테마 기본 적용
+    - [x] 시안 액센트 컬러
+    - [x] 2열 썸네일 그리드
+    - [x] 호버 오버레이 UI
 ```
 
 ### 7.10 MVP 완료 기준
