@@ -6,6 +6,7 @@ import {
   apiError,
   apiSuccess,
 } from '@/lib/api/utils'
+import { resolveProjectThumbnail } from '@/lib/thumbnail'
 
 type RouteContext = {
   params: Promise<{ projectId: string }>
@@ -79,9 +80,37 @@ export async function PATCH(request: Request, context: RouteContext) {
   const updateData: Record<string, unknown> = {}
   if (title !== undefined) updateData.title = title.trim()
   if (description !== undefined) updateData.description = description?.trim() || null
-  if (thumbnail_url !== undefined) updateData.thumbnail_url = thumbnail_url || null
   if (url !== undefined) updateData.url = url?.trim() || null
   if (github_repo !== undefined) updateData.github_repo = github_repo?.trim() || null
+
+  // 썸네일 처리:
+  // 1. 명시적으로 thumbnail_url이 전달되면 그 값 사용
+  // 2. URL/GitHub가 변경되고 썸네일이 전달되지 않으면 자동 생성
+  if (thumbnail_url !== undefined) {
+    updateData.thumbnail_url = thumbnail_url || null
+  } else if (url !== undefined || github_repo !== undefined) {
+    // URL이나 GitHub가 변경되면 새 썸네일 자동 생성 시도
+    const newUrl = url !== undefined ? url?.trim() : undefined
+    const newGithub = github_repo !== undefined ? github_repo?.trim() : undefined
+
+    // 기존 프로젝트 정보 조회
+    const { data: currentProject } = await supabase
+      .from('projects')
+      .select('url, github_repo, thumbnail_url')
+      .eq('id', projectId)
+      .single()
+
+    // 기존 썸네일이 없거나 URL/GitHub가 변경된 경우에만 자동 생성
+    const finalUrl = newUrl ?? currentProject?.url
+    const finalGithub = newGithub ?? currentProject?.github_repo
+
+    if (!currentProject?.thumbnail_url || newUrl || newGithub) {
+      const autoThumbnail = await resolveProjectThumbnail(null, finalGithub, finalUrl)
+      if (autoThumbnail) {
+        updateData.thumbnail_url = autoThumbnail
+      }
+    }
+  }
 
   const { data, error } = await supabase
     .from('projects')
