@@ -2,19 +2,8 @@
 
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from '@/components/ui/card'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Star, ExternalLink, StarOff } from 'lucide-react'
+import { Star, ExternalLink, StarOff, ImageOff } from 'lucide-react'
 import type { ProjectWithProfile, ProjectMetadata } from '@/types/database'
-import { TechStackTags } from './tech-stack-tags'
-import { ProjectStatusDot } from './project-status-badge'
-import { GitHubStarsCompact } from './github-info-section'
 
 type ProjectWithOptionalMetadata = ProjectWithProfile & {
   project_metadata?: ProjectMetadata | null
@@ -32,8 +21,6 @@ export function ProjectCard({
   onToggleFavorite,
 }: ProjectCardProps) {
   const router = useRouter()
-  const ownerName = project.profiles?.display_name || '익명'
-  const ownerInitial = ownerName.charAt(0).toUpperCase()
 
   const handleCardClick = () => {
     router.push(`/projects/${project.id}`)
@@ -52,27 +39,49 @@ export function ProjectCard({
   }
 
   return (
-    <Card
-      className="h-full hover:shadow-lg transition-shadow cursor-pointer group"
+    <div
+      className="group relative aspect-video w-full overflow-hidden rounded-xl bg-muted cursor-pointer shadow-sm hover:shadow-xl transition-all duration-300"
       onClick={handleCardClick}
     >
-      {project.thumbnail_url && (
-        <div className="aspect-video w-full overflow-hidden rounded-t-lg relative">
-          <Image
-            src={project.thumbnail_url}
-            alt={project.title}
-            fill
-            className="object-cover"
-            unoptimized
-          />
-          {/* 즐겨찾기 버튼 (hover 시 표시) */}
+      {/* 썸네일 이미지 */}
+      {project.thumbnail_url ? (
+        <Image
+          src={project.thumbnail_url}
+          alt={project.title}
+          fill
+          className="object-cover transition-transform duration-300 group-hover:scale-105"
+          unoptimized
+        />
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-muted to-muted-foreground/20">
+          <ImageOff className="h-12 w-12 text-muted-foreground/50" />
+        </div>
+      )}
+
+      {/* 즐겨찾기 표시 (항상 표시) */}
+      {project.is_favorite && (
+        <div className="absolute top-2 left-2 z-10">
+          <Star className="h-5 w-5 fill-yellow-400 text-yellow-400 drop-shadow-lg" />
+        </div>
+      )}
+
+      {/* 호버 오버레이 */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+        {/* 상단 액션 버튼들 */}
+        <div className="absolute top-3 right-3 flex items-center gap-2">
+          {/* 평균 별점 */}
+          {averageRating !== undefined && averageRating > 0 && (
+            <div className="flex items-center gap-1 text-sm text-white bg-black/50 rounded-full px-2 py-0.5">
+              <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+              <span>{averageRating.toFixed(1)}</span>
+            </div>
+          )}
+          {/* 즐겨찾기 토글 */}
           {onToggleFavorite && (
             <button
               onClick={handleToggleFavorite}
-              className="absolute top-2 right-2 p-1.5 rounded-full bg-black/50 hover:bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity"
-              aria-label={
-                project.is_favorite ? '즐겨찾기 해제' : '즐겨찾기 추가'
-              }
+              className="p-1.5 rounded-full bg-black/50 hover:bg-black/70 transition-colors"
+              aria-label={project.is_favorite ? '즐겨찾기 해제' : '즐겨찾기 추가'}
             >
               {project.is_favorite ? (
                 <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
@@ -82,69 +91,33 @@ export function ProjectCard({
             </button>
           )}
         </div>
-      )}
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <CardTitle className="text-lg line-clamp-1">
-              {project.title}
-            </CardTitle>
-            {project.is_favorite && !project.thumbnail_url && (
-              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 flex-shrink-0" />
-            )}
-            {/* 프로젝트 상태 점 */}
-            {project.project_metadata?.status && project.project_metadata.status !== 'unknown' && (
-              <ProjectStatusDot status={project.project_metadata.status} />
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            {/* GitHub Stars */}
-            <GitHubStarsCompact stars={project.project_metadata?.github_stars} />
-            {/* 평균 별점 */}
-            {averageRating !== undefined && averageRating > 0 && (
-              <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                <span>{averageRating.toFixed(1)}</span>
-              </div>
-            )}
-          </div>
-        </div>
-        {project.description && (
-          <CardDescription className="line-clamp-2">
-            {project.description}
-          </CardDescription>
-        )}
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {/* 기술 스택 태그 (최대 3개) */}
-        {project.project_metadata && (
-          <TechStackTags
-            techStack={project.project_metadata.tech_stack || []}
-            language={project.project_metadata.github_language}
-            topics={project.project_metadata.github_topics || []}
-            maxTags={3}
-          />
-        )}
 
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Avatar className="h-6 w-6">
-            <AvatarImage src={project.profiles?.avatar_url || undefined} />
-            <AvatarFallback className="text-xs">{ownerInitial}</AvatarFallback>
-          </Avatar>
-          <span>{ownerName}</span>
-        </div>
+        {/* 하단 정보 */}
+        <div className="space-y-2">
+          {/* 앱 이름 */}
+          <h3 className="text-lg font-semibold text-white line-clamp-1">
+            {project.title}
+          </h3>
 
-        {/* 앱 열기 버튼 - Link 제거하고 Card onClick으로 네비게이션 처리 */}
-        {project.url && (
-          <button
-            onClick={handleLaunchApp}
-            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-8 px-3 w-full"
-          >
-            <ExternalLink className="h-4 w-4" />
-            앱 열기
-          </button>
-        )}
-      </CardContent>
-    </Card>
+          {/* 설명 */}
+          {project.description && (
+            <p className="text-sm text-white/80 line-clamp-2">
+              {project.description}
+            </p>
+          )}
+
+          {/* 앱 열기 버튼 */}
+          {project.url && (
+            <button
+              onClick={handleLaunchApp}
+              className="inline-flex items-center justify-center gap-2 w-full rounded-lg bg-white text-black font-medium text-sm h-9 hover:bg-white/90 transition-colors mt-2"
+            >
+              <ExternalLink className="h-4 w-4" />
+              앱 열기
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
   )
 }
