@@ -13,7 +13,9 @@
     "test:e2e": "playwright test --project=chromium",
     "test:e2e:ui": "playwright test --ui --project=chromium",
     "test:e2e:auth": "playwright test --project=setup --project=authenticated",
-    "capture:thumbnails": "npx tsx scripts/capture-thumbnails.ts"
+    "capture:thumbnails": "npx tsx scripts/capture-thumbnails.ts",
+    "scan": "npx tsx scripts/scan-repos.ts",
+    "scan:full": "npx tsx scripts/scan-repos.ts && npx tsx scripts/capture-thumbnails.ts"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.11",
