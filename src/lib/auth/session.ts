@@ -45,14 +45,26 @@ export function isValidSessionToken(token: string): boolean {
   return true
 }
 
-// 비밀번호 검증
+// 비밀번호 검증 (타이밍 공격 방지)
 export function verifyPassword(password: string): boolean {
   const adminPassword = process.env.ADMIN_PASSWORD
   if (!adminPassword) {
     console.warn('ADMIN_PASSWORD 환경변수가 설정되지 않았습니다')
     return false
   }
-  return password === adminPassword
+
+  // 타이밍 공격 방지를 위한 상수 시간 비교
+  // crypto.timingSafeEqual 사용 (Node.js 내장)
+  const passwordBuffer = Buffer.from(password)
+  const adminPasswordBuffer = Buffer.from(adminPassword)
+
+  // 길이가 다르면 더미 비교 수행 (길이 정보 노출 방지)
+  if (passwordBuffer.length !== adminPasswordBuffer.length) {
+    crypto.timingSafeEqual(adminPasswordBuffer, adminPasswordBuffer)
+    return false
+  }
+
+  return crypto.timingSafeEqual(passwordBuffer, adminPasswordBuffer)
 }
 
 // 현재 세션 확인 (서버 컴포넌트/API용)
